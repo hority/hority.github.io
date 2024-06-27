@@ -3,45 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FlappyBird-like Game</title>
+    <title>FlappyMarie</title>
     <style>
         body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; overflow: hidden; touch-action: none; }
         #game { max-width: 100%; max-height: 100%; touch-action: none; }
         #startScreen { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: rgba(0,0,0,0.7); color: white; text-align: center; }
-        #startScreen h1 { font-size: 24px; margin-bottom: 20px; }
-        #startScreen p { font-size: 16px; margin-bottom: 20px; }
-        #startButton { font-size: 18px; padding: 10px 20px; background-color: #4CAF50; border: none; color: white; cursor: pointer; }
+        #startScreen h1 { font-size: 32px; margin-bottom: 20px; }
+        #startScreen p { font-size: 18px; margin-bottom: 20px; }
+        #startButton { font-size: 20px; padding: 10px 20px; background-color: #4CAF50; border: none; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
     <svg id="game" width="400" height="600" viewBox="0 0 400 600">
         <rect width="400" height="600" fill="#87CEEB"/>
-        <circle id="bird" cx="100" cy="300" r="20" fill="yellow"/>
+        <g id="marie" transform="translate(100, 300)">
+            <!-- Marie's body (24x32 pixel representation) -->
+            <rect x="-12" y="-16" width="24" height="32" fill="#FFD700"/>
+            <!-- Marie's hair -->
+            <rect x="-12" y="-16" width="24" height="6" fill="#8B4513"/>
+            <rect x="-12" y="-10" width="4" height="14" fill="#8B4513"/>
+            <rect x="8" y="-10" width="4" height="14" fill="#8B4513"/>
+            <!-- Marie's face -->
+            <rect x="-6" y="-8" width="3" height="3" fill="#000"/>
+            <rect x="3" y="-8" width="3" height="3" fill="#000"/>
+            <rect x="-3" y="-1" width="6" height="2" fill="#FF69B4"/>
+            <!-- Marie's dress -->
+            <rect x="-12" y="8" width="24" height="8" fill="#FF69B4"/>
+            <!-- Marie's hands (extended) -->
+            <rect id="leftHand" x="-18" y="0" width="8" height="4" fill="#FFD700">
+                <animate id="leftHandAnim" attributeName="y" values="0;-4;0;4;0" dur="0.5s" repeatCount="indefinite" begin="indefinite"/>
+            </rect>
+            <rect id="rightHand" x="10" y="0" width="8" height="4" fill="#FFD700">
+                <animate id="rightHandAnim" attributeName="y" values="0;4;0;-4;0" dur="0.5s" repeatCount="indefinite" begin="indefinite"/>
+            </rect>
+        </g>
         <text id="score" x="20" y="40" font-family="Arial" font-size="20" fill="white">Score: 0</text>
     </svg>
     <div id="startScreen">
-        <h1>FlappyBird-like Game</h1>
-        <p>画面をタップして鳥を飛ばし、パイプを避けよう！</p>
+        <h1>FlappyMarie</h1>
+        <p>タップまたはスペースキーでMarieを飛ばし、パイプを避けよう！</p>
         <button id="startButton">スタート</button>
     </div>
 
     <script>
         const svg = document.getElementById('game');
-        const bird = document.getElementById('bird');
+        const marie = document.getElementById('marie');
+        const leftHandAnim = document.getElementById('leftHandAnim');
+        const rightHandAnim = document.getElementById('rightHandAnim');
         const scoreText = document.getElementById('score');
         const startScreen = document.getElementById('startScreen');
         const startButton = document.getElementById('startButton');
-        let birdY = 300;
-        let birdVelocity = 0;
+        let marieY = 300;
+        let marieVelocity = 0;
         let score = 0;
         let gameStarted = false;
         const gravity = 0.5;
         const jump = -10;
-        const pipeWidth = 60;
+        const pipeWidth = 80;
         const pipeGap = 200;
+        const marieRadius = 20; // Slightly smaller hitbox
         let pipes = [];
         let gameLoop;
         let pipeInterval;
+        let handAnimationSpeed = 0.5; // Initial hand animation speed
 
         function resizeGame() {
             const windowRatio = window.innerWidth / window.innerHeight;
@@ -58,32 +82,37 @@
 
         function createPipe() {
             const pipeHeight = Math.random() * 300 + 100;
-            const topPipe = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            const bottomPipe = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            const topPipe = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const bottomPipe = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
-            topPipe.setAttribute("width", pipeWidth);
-            topPipe.setAttribute("height", pipeHeight);
-            topPipe.setAttribute("x", 400);
-            topPipe.setAttribute("y", 0);
-            topPipe.setAttribute("fill", "green");
+            // Top pipe
+            topPipe.innerHTML = `
+                <rect width="${pipeWidth}" height="${pipeHeight}" fill="#00A651"/>
+                <rect x="0" y="${pipeHeight - 20}" width="${pipeWidth}" height="20" fill="#00783A"/>
+                <rect x="-5" y="${pipeHeight - 25}" width="${pipeWidth + 10}" height="25" fill="#00A651"/>
+            `;
 
-            bottomPipe.setAttribute("width", pipeWidth);
-            bottomPipe.setAttribute("height", 600 - pipeHeight - pipeGap);
-            bottomPipe.setAttribute("x", 400);
-            bottomPipe.setAttribute("y", pipeHeight + pipeGap);
-            bottomPipe.setAttribute("fill", "green");
+            // Bottom pipe
+            bottomPipe.innerHTML = `
+                <rect y="${pipeHeight + pipeGap}" width="${pipeWidth}" height="${600 - pipeHeight - pipeGap}" fill="#00A651"/>
+                <rect x="0" y="${pipeHeight + pipeGap}" width="${pipeWidth}" height="20" fill="#00783A"/>
+                <rect x="-5" y="${pipeHeight + pipeGap}" width="${pipeWidth + 10}" height="25" fill="#00A651"/>
+            `;
+
+            topPipe.setAttribute("transform", `translate(400, 0)`);
+            bottomPipe.setAttribute("transform", `translate(400, 0)`);
 
             svg.appendChild(topPipe);
             svg.appendChild(bottomPipe);
 
-            pipes.push({ top: topPipe, bottom: bottomPipe, x: 400 });
+            pipes.push({ top: topPipe, bottom: bottomPipe, x: 400, height: pipeHeight });
         }
 
         function movePipes() {
             pipes.forEach((pipe, index) => {
                 pipe.x -= 2;
-                pipe.top.setAttribute("x", pipe.x);
-                pipe.bottom.setAttribute("x", pipe.x);
+                pipe.top.setAttribute("transform", `translate(${pipe.x}, 0)`);
+                pipe.bottom.setAttribute("transform", `translate(${pipe.x}, 0)`);
 
                 if (pipe.x + pipeWidth < 0) {
                     svg.removeChild(pipe.top);
@@ -95,8 +124,8 @@
 
                 if (
                     pipe.x < 120 && pipe.x + pipeWidth > 80 &&
-                    (birdY < pipe.top.height.baseVal.value + 20 ||
-                     birdY > pipe.top.height.baseVal.value + pipeGap - 20)
+                    (marieY - marieRadius < pipe.height ||
+                     marieY + marieRadius > pipe.height + pipeGap)
                 ) {
                     gameOver();
                 }
@@ -106,13 +135,14 @@
         function gameOver() {
             cancelAnimationFrame(gameLoop);
             clearInterval(pipeInterval);
+            stopHandAnimation();
             alert(`Game Over! Your score: ${score}`);
             resetGame();
         }
 
         function resetGame() {
-            birdY = 300;
-            birdVelocity = 0;
+            marieY = 300;
+            marieVelocity = 0;
             score = 0;
             gameStarted = false;
             pipes.forEach(pipe => {
@@ -120,19 +150,26 @@
                 svg.removeChild(pipe.bottom);
             });
             pipes = [];
-            bird.setAttribute("cy", birdY);
+            marie.setAttribute("transform", `translate(100, ${marieY})`);
             scoreText.textContent = "Score: 0";
             startScreen.style.display = "flex";
+            stopHandAnimation();
         }
 
         function update() {
             if (!gameStarted) return;
 
-            birdVelocity += gravity;
-            birdY += birdVelocity;
-            bird.setAttribute("cy", birdY);
+            marieVelocity += gravity;
+            marieY += marieVelocity;
+            marie.setAttribute("transform", `translate(100, ${marieY})`);
 
-            if (birdY > 580 || birdY < 20) {
+            // Update hand animation speed
+            handAnimationSpeed = marieVelocity < 0 ? 0.2 : 0.5;
+            leftHandAnim.setAttribute("dur", `${handAnimationSpeed}s`);
+            rightHandAnim.setAttribute("dur", `${handAnimationSpeed}s`);
+
+            // Marieが完全に画面外に出た場合のみゲームオーバー
+            if (marieY > 600 + marieRadius || marieY < -marieRadius) {
                 gameOver();
                 return;
             }
@@ -142,20 +179,34 @@
             gameLoop = requestAnimationFrame(update);
         }
 
+        function startHandAnimation() {
+            leftHandAnim.beginElement();
+            rightHandAnim.beginElement();
+        }
+
+        function stopHandAnimation() {
+            leftHandAnim.endElement();
+            rightHandAnim.endElement();
+        }
+
         function startGame() {
             if (!gameStarted) {
                 gameStarted = true;
                 startScreen.style.display = "none";
+                createPipe(); // 最初のパイプをすぐに作成
                 pipeInterval = setInterval(createPipe, 3000);
+                startHandAnimation();
                 update();
             }
-            birdVelocity = jump;
+            marieVelocity = jump;
         }
 
         svg.addEventListener("touchstart", function(event) {
             event.preventDefault();
             if (gameStarted) {
-                birdVelocity = jump;
+                marieVelocity = jump;
+            } else {
+                startGame();
             }
         });
 
@@ -163,7 +214,9 @@
             if (event.code === "Space") {
                 event.preventDefault();
                 if (gameStarted) {
-                    birdVelocity = jump;
+                    marieVelocity = jump;
+                } else {
+                    startGame();
                 }
             }
         });
