@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FlappyBird-like Game</title>
     <style>
-        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; overflow: hidden; }
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; overflow: hidden; touch-action: none; }
         #game { max-width: 100%; max-height: 100%; touch-action: none; }
         #startScreen { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: rgba(0,0,0,0.7); color: white; text-align: center; }
         #startScreen h1 { font-size: 24px; margin-bottom: 20px; }
@@ -41,6 +41,7 @@
         const pipeGap = 200;
         let pipes = [];
         let gameLoop;
+        let pipeInterval;
 
         function resizeGame() {
             const windowRatio = window.innerWidth / window.innerHeight;
@@ -52,7 +53,6 @@
                 svg.style.width = 'auto';
                 svg.style.height = '100vh';
             }
-            // スマホのアドレスバー対策
             document.body.style.height = `${window.innerHeight}px`;
         }
 
@@ -105,6 +105,7 @@
 
         function gameOver() {
             cancelAnimationFrame(gameLoop);
+            clearInterval(pipeInterval);
             alert(`Game Over! Your score: ${score}`);
             resetGame();
         }
@@ -125,6 +126,8 @@
         }
 
         function update() {
+            if (!gameStarted) return;
+
             birdVelocity += gravity;
             birdY += birdVelocity;
             bird.setAttribute("cy", birdY);
@@ -143,7 +146,7 @@
             if (!gameStarted) {
                 gameStarted = true;
                 startScreen.style.display = "none";
-                setInterval(createPipe, 3000);
+                pipeInterval = setInterval(createPipe, 3000);
                 update();
             }
             birdVelocity = jump;
@@ -152,7 +155,7 @@
         svg.addEventListener("touchstart", function(event) {
             event.preventDefault();
             if (gameStarted) {
-                startGame();
+                birdVelocity = jump;
             }
         });
 
@@ -160,19 +163,25 @@
             if (event.code === "Space") {
                 event.preventDefault();
                 if (gameStarted) {
-                    startGame();
+                    birdVelocity = jump;
                 }
             }
         });
 
-        startButton.addEventListener("click", function() {
-            gameStarted = true;
-            startGame();
-        });
+        startButton.addEventListener("click", startGame);
 
         window.addEventListener('resize', resizeGame);
         window.addEventListener('orientationchange', resizeGame);
         resizeGame();
+
+        // ピンチズームとスクロールを防止
+        document.addEventListener('touchmove', function(event) {
+            event.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('wheel', function(event) {
+            event.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
