@@ -10,14 +10,18 @@
         #startScreen, #gameOverScreen { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: rgba(0,0,0,0.7); color: white; text-align: center; }
         #startScreen h1, #gameOverScreen h1 { font-size: 32px; margin-bottom: 20px; }
         #startScreen p, #gameOverScreen p { font-size: 18px; margin-bottom: 20px; }
-        #startButton, #restartButton, #shareButton { font-size: 20px; padding: 10px 20px; background-color: #4CAF50; border: none; color: white; cursor: pointer; margin: 10px; }
+        #startButton, #restartButton, #shareButton, #instagramButton { font-size: 20px; padding: 10px 20px; border: none; color: white; cursor: pointer; margin: 10px; border-radius: 5px; }
+        #startButton, #restartButton { background-color: #4CAF50; }
         #shareButton { background-color: #3b5998; }
+        #instagramButton { background-color: #E1306C; }
+        #instagramText { font-size: 18px; color: white; margin-top: 20px; }
         #copyConfirmation { display: none; color: #4CAF50; margin-top: 10px; }
     </style>
 </head>
 <body>
     <svg id="game" width="400" height="600" viewBox="0 0 400 600">
         <rect width="400" height="600" fill="#87CEEB"/>
+        <g id="pipes"></g>
         <g id="marie" transform="translate(100, 300)">
             <!-- Marie's body (24x32 pixel representation) -->
             <rect x="-12" y="-16" width="24" height="32" fill="#FFD700"/>
@@ -52,11 +56,14 @@
         <button id="restartButton">もう一度プレイ</button>
         <button id="shareButton">結果をシェア</button>
         <p id="copyConfirmation">クリップボードにコピーしました！</p>
+        <p id="instagramText">九伊万里絵のSNSをチェックしよう！</p>
+        <button id="instagramButton" onclick="window.open('https://www.instagram.com/coco9marie/', '_blank')">@coco9marie</button>
     </div>
 
     <script>
         const svg = document.getElementById('game');
         const marie = document.getElementById('marie');
+        const pipesGroup = document.getElementById('pipes');
         const leftHandAnim = document.getElementById('leftHandAnim');
         const rightHandAnim = document.getElementById('rightHandAnim');
         const scoreText = document.getElementById('score');
@@ -69,13 +76,14 @@
         const copyConfirmation = document.getElementById('copyConfirmation');
         let marieY = 300;
         let marieVelocity = 0;
+        let marieRotation = 0;
         let score = 0;
         let gameStarted = false;
         const gravity = 0.5;
         const jump = -10;
         const pipeWidth = 80;
         const pipeGap = 200;
-        const marieRadius = 20; // Slightly smaller hitbox
+        const marieRadius = 5; // Extremely small hitbox
         let pipes = [];
         let gameLoop;
         let pipeInterval;
@@ -116,8 +124,8 @@
             topPipe.setAttribute("transform", `translate(400, 0)`);
             bottomPipe.setAttribute("transform", `translate(400, 0)`);
 
-            svg.appendChild(topPipe);
-            svg.appendChild(bottomPipe);
+            pipesGroup.appendChild(topPipe);
+            pipesGroup.appendChild(bottomPipe);
 
             pipes.push({ top: topPipe, bottom: bottomPipe, x: 400, height: pipeHeight });
         }
@@ -129,17 +137,16 @@
                 pipe.bottom.setAttribute("transform", `translate(${pipe.x}, 0)`);
 
                 if (pipe.x + pipeWidth < 0) {
-                    svg.removeChild(pipe.top);
-                    svg.removeChild(pipe.bottom);
+                    pipesGroup.removeChild(pipe.top);
+                    pipesGroup.removeChild(pipe.bottom);
                     pipes.splice(index, 1);
                     score++;
                     scoreText.textContent = `Score: ${score}`;
                 }
 
                 if (
-                    pipe.x < 120 && pipe.x + pipeWidth > 80 &&
-                    (marieY - marieRadius < pipe.height ||
-                     marieY + marieRadius > pipe.height + pipeGap)
+                    pipe.x < 100 && pipe.x + pipeWidth > 100 &&
+                    (marieY < pipe.height || marieY > pipe.height + pipeGap)
                 ) {
                     gameOver();
                 }
@@ -152,23 +159,39 @@
             stopHandAnimation();
             finalScoreText.textContent = `あなたのスコア: ${score}`;
             gameOverScreen.style.display = 'flex';
+
+            // Marie falls upside down
+            let fallRotation = 0;
+            let fallY = marieY;
+            function fallAnimation() {
+                fallRotation += 10;
+                fallY += 10;
+                marie.setAttribute("transform", `translate(100, ${fallY}) rotate(${fallRotation}, 0, 0)`);
+                if (fallY < 650) {
+                    requestAnimationFrame(fallAnimation);
+                }
+            }
+            fallAnimation();
         }
 
         function resetGame() {
             marieY = 300;
             marieVelocity = 0;
+            marieRotation = 0;
             score = 0;
             gameStarted = false;
             pipes.forEach(pipe => {
-                svg.removeChild(pipe.top);
-                svg.removeChild(pipe.bottom);
+                pipesGroup.removeChild(pipe.top);
+                pipesGroup.removeChild(pipe.bottom);
             });
             pipes = [];
-            marie.setAttribute("transform", `translate(100, ${marieY})`);
+            marie.setAttribute("transform", `translate(100, ${marieY}) rotate(0, 0, 0)`);
             scoreText.textContent = "Score: 0";
             gameOverScreen.style.display = 'none';
             startScreen.style.display = "flex";
             stopHandAnimation();
+            cancelAnimationFrame(gameLoop);
+            clearInterval(pipeInterval);
         }
 
         function update() {
@@ -176,7 +199,8 @@
 
             marieVelocity += gravity;
             marieY += marieVelocity;
-            marie.setAttribute("transform", `translate(100, ${marieY})`);
+            marieRotation = Math.max(-45, Math.min(45, marieRotation + Math.random() * 10 - 5));
+            marie.setAttribute("transform", `translate(100, ${marieY}) rotate(${marieRotation}, 0, 0)`);
 
             // Update hand animation speed
             handAnimationSpeed = marieVelocity < 0 ? 0.2 : 0.5;
