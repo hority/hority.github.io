@@ -1,252 +1,61 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FlappyMarie</title>
-    <style>
-        body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh;background-color:#f0f0f0;overflow:hidden;touch-action:none}#game{max-width:100%;max-height:100%;touch-action:none}#startScreen,#gameOverScreen{position:absolute;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;background-color:rgba(0,0,0,0.7);color:white;text-align:center}#startScreen h1,#gameOverScreen h1{font-size:32px;margin-bottom:20px}#startScreen p,#gameOverScreen p{font-size:18px;margin-bottom:20px}#startButton,#restartButton,#shareButton,#instagramButton{font-size:20px;padding:10px 20px;border:none;color:white;cursor:pointer;margin:10px;border-radius:5px}#startButton,#restartButton{background-color:#4CAF50}#shareButton{background-color:#3b5998}#instagramButton{background-color:#E1306C}#instagramText{font-size:18px;color:white;margin-top:20px}#copyConfirmation{display:none;color:#4CAF50;margin-top:10px}#version{position:absolute;bottom:10px;right:10px;color:white;font-size:14px}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>FlappyMarie</title>
+<style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh;background-color:#87CEEB;overflow:hidden;touch-action:none}#g{max-width:100%;max-height:100%;touch-action:none}#s,#o{position:absolute;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;background-color:rgba(0,0,0,.7);color:#fff;text-align:center}#s h1,#o h1{font-size:32px;margin-bottom:20px}#s p,#o p{font-size:18px;margin-bottom:20px}#b,#r,#h,#i{font-size:20px;padding:10px 20px;border:none;color:#fff;cursor:pointer;margin:10px;border-radius:5px}#b,#r{background-color:#4CAF50}#h{background-color:#3b5998}#i{background-color:#E1306C}#t{font-size:18px;color:#fff;margin-top:20px}#c{display:none;color:#4CAF50;margin-top:10px}#v{position:absolute;bottom:10px;right:10px;color:#fff;font-size:14px}</style>
 </head>
 <body>
-    <svg id="game" width="400" height="600" viewBox="0 0 400 600">
-        <rect width="400" height="600" fill="#87CEEB"/>
-        <g id="pipes"></g>
-        <g id="marie" transform="translate(100, 300)">
-            <rect x="-12" y="-16" width="24" height="32" fill="#FFD700"/>
-            <rect x="-12" y="-16" width="24" height="6" fill="#8B4513"/>
-            <rect x="-12" y="-10" width="4" height="14" fill="#8B4513"/>
-            <rect x="8" y="-10" width="4" height="14" fill="#8B4513"/>
-            <rect x="-6" y="-8" width="3" height="3" fill="#000"/>
-            <rect x="3" y="-8" width="3" height="3" fill="#000"/>
-            <rect x="-3" y="-1" width="6" height="2" fill="#FF69B4"/>
-            <rect x="-12" y="8" width="24" height="8" fill="#FF69B4"/>
-            <rect id="leftHand" x="-18" y="0" width="8" height="4" fill="#FFD700">
-                <animate id="leftHandAnim" attributeName="y" values="0;-4;0;4;0" dur="0.5s" repeatCount="indefinite" begin="indefinite"/>
-            </rect>
-            <rect id="rightHand" x="10" y="0" width="8" height="4" fill="#FFD700">
-                <animate id="rightHandAnim" attributeName="y" values="0;4;0;-4;0" dur="0.5s" repeatCount="indefinite" begin="indefinite"/>
-            </rect>
-        </g>
-        <text id="score" x="20" y="40" font-family="Arial" font-size="20" fill="white">Score: 0</text>
-    </svg>
-    <div id="startScreen">
-        <h1>FlappyMarie</h1>
-        <p>タップまたはスペースキーでMarieを飛ばし、パイプを避けよう！</p>
-        <button id="startButton">スタート</button>
-        <div id="version">v0.19</div>
-    </div>
-    <div id="gameOverScreen" style="display: none;">
-        <h1>Game Over</h1>
-        <p id="finalScore"></p>
-        <button id="restartButton">もう一度プレイ</button>
-        <button id="shareButton">結果をシェア</button>
-        <p id="copyConfirmation">クリップボードにコピーしました！</p>
-        <p id="instagramText">九伊万里絵のSNSをチェックしよう！</p>
-        <button id="instagramButton" onclick="window.open('https://www.instagram.com/coco9marie/', '_blank')">@coco9marie</button>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', (e) => {
-            const s = document.getElementById('game'),
-                  m = document.getElementById('marie'),
-                  p = document.getElementById('pipes'),
-                  l = document.getElementById('leftHandAnim'),
-                  r = document.getElementById('rightHandAnim'),
-                  sc = document.getElementById('score'),
-                  ss = document.getElementById('startScreen'),
-                  gs = document.getElementById('gameOverScreen'),
-                  sb = document.getElementById('startButton'),
-                  rb = document.getElementById('restartButton'),
-                  shb = document.getElementById('shareButton'),
-                  fs = document.getElementById('finalScore'),
-                  cc = document.getElementById('copyConfirmation');
-            let y = 300, v = 0, rot = 0, scr = 0, gs1 = false,
-                g = 0.5, j = -10, pw = 80, pg = 200, mr = 5,
-                pi = [], gl, pit, ha = 0.5;
-
-            function rs() {
-                const wr = window.innerWidth / window.innerHeight,
-                      gr = 400 / 600;
-                if (wr < gr) {
-                    s.style.width = '100vw';
-                    s.style.height = 'auto';
-                } else {
-                    s.style.width = 'auto';
-                    s.style.height = '100vh';
-                }
-                document.body.style.height = `${window.innerHeight}px`;
-            }
-
-            function cp() {
-                const ph = Math.random() * 300 + 100,
-                      tp = document.createElementNS("http://www.w3.org/2000/svg", "g"),
-                      bp = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                tp.innerHTML = `
-                    <rect width="${pw}" height="${ph}" fill="#00A651"/>
-                    <rect x="0" y="${ph - 20}" width="${pw}" height="20" fill="#00783A"/>
-                    <rect x="-5" y="${ph - 25}" width="${pw + 10}" height="25" fill="#00A651"/>
-                `;
-                bp.innerHTML = `
-                    <rect y="${ph + pg}" width="${pw}" height="${600 - ph - pg}" fill="#00A651"/>
-                    <rect x="0" y="${ph + pg}" width="${pw}" height="20" fill="#00783A"/>
-                    <rect x="-5" y="${ph + pg}" width="${pw + 10}" height="25" fill="#00A651"/>
-                `;
-                tp.setAttribute("transform", `translate(400, 0)`);
-                bp.setAttribute("transform", `translate(400, 0)`);
-                p.appendChild(tp);
-                p.appendChild(bp);
-                pi.push({ t: tp, b: bp, x: 400, h: ph });
-            }
-
-            function mp() {
-                pi.forEach((pipe, i) => {
-                    pipe.x -= 2;
-                    pipe.t.setAttribute("transform", `translate(${pipe.x}, 0)`);
-                    pipe.b.setAttribute("transform", `translate(${pipe.x}, 0)`);
-                    if (pipe.x + pw < 0) {
-                        p.removeChild(pipe.t);
-                        p.removeChild(pipe.b);
-                        pi.splice(i, 1);
-                        scr++;
-                        sc.textContent = `Score: ${scr}`;
-                    }
-                    if (pipe.x < 100 && pipe.x + pw > 100 && (y < pipe.h || y > pipe.h + pg)) {
-                        go();
-                    }
-                });
-            }
-
-            function go() {
-                cancelAnimationFrame(gl);
-                clearInterval(pit);
-                sha();
-                fs.textContent = `あなたのスコア: ${scr}`;
-                gs.style.display = 'flex';
-                let fr = 0, fy = y;
-                function fa() {
-                    fr += 10;
-                    fy += 10;
-                    m.setAttribute("transform", `translate(100, ${fy}) rotate(${fr}, 0, 0)`);
-                    if (fy < 650) {
-                        requestAnimationFrame(fa);
-                    }
-                }
-                fa();
-            }
-
-            function rg() {
-                y = 300;
-                v = 0;
-                rot = 0;
-                scr = 0;
-                gs1 = false;
-                pi.forEach(pipe => {
-                    p.removeChild(pipe.t);
-                    p.removeChild(pipe.b);
-                });
-                pi = [];
-                m.setAttribute("transform", `translate(100, ${y}) rotate(0, 0, 0)`);
-                sc.textContent = "Score: 0";
-                gs.style.display = 'none';
-                ss.style.display = "flex";
-                cancelAnimationFrame(gl);
-                clearInterval(pit);
-                ha = 0.5;
-                l.setAttribute("dur", `${ha}s`);
-                r.setAttribute("dur", `${ha}s`);
-            }
-
-            function u() {
-                if (!gs1) return;
-                v += g;
-                y += v;
-                rot = Math.max(-45, Math.min(45, rot + Math.random() * 10 - 5));
-                m.setAttribute("transform", `translate(100, ${y}) rotate(${rot}, 0, 0)`);
-                ha = v < 0 ? 0.2 : 0.5;
-                l.setAttribute("dur", `${ha}s`);
-                r.setAttribute("dur", `${ha}s`);
-                if (y > 600 + mr || y < -mr) {
-                    go();
-                    return;
-                }
-                mp();
-                gl = requestAnimationFrame(u);
-            }
-
-            function sta() {
-                l.beginElement();
-                r.beginElement();
-            }
-
-            function sha() {
-                l.endElement();
-                r.endElement();
-            }
-
-            function sg() {
-                if (!gs1) {
-                    gs1 = true;
-                    ss.style.display = "none";
-                    cp();
-                    pit = setInterval(cp, 3000);
-                    sta();
-                    u();
-                }
-                v = j;
-            }
-
-            function sr() {
-                const st = `FlappyMarieで${scr}点獲得しました！みんなも遊んでみよう！ http://hority.github.io/`;
-                navigator.clipboard.writeText(st).then(() => {
-                    cc.style.display = 'block';
-                    setTimeout(() => {
-                        cc.style.display = 'none';
-                    }, 2000);
-                });
-            }
-
-            s.addEventListener("touchstart", function(e) {
-                e.preventDefault();
-                if (gs1) {
-                    v = j;
-                } else {
-                    sg();
-                }
-            });
-
-            document.addEventListener("keydown", (e) => {
-                if (e.code === "Space") {
-                    e.preventDefault();
-                    if (gs1) {
-                        v = j;
-                    } else {
-                        sg();
-                    }
-                }
-            });
-
-            sb.addEventListener("click", sg);
-            rb.addEventListener("click", () => {
-                rg();
-                setTimeout(sg, 0); // 非同期でゲームを開始
-            });
-            shb.addEventListener("click", sr);
-
-            window.addEventListener('resize', rs);
-            window.addEventListener('orientationchange', rs);
-            rs();
-
-            document.addEventListener('touchmove', function(e) {
-                e.preventDefault();
-            }, { passive: false });
-
-            document.addEventListener('wheel', function(e) {
-                e.preventDefault();
-            }, { passive: false });
-
-            sta(); // 初期状態で手のアニメーションを開始
-        });
-    </script>
+<svg id="g" width="400" height="600" viewBox="0 0 400 600">
+<defs>
+<linearGradient id="sg" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1"/>
+<stop offset="100%" style="stop-color:#87CEEB;stop-opacity:1"/>
+</linearGradient>
+<linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="0%">
+<stop offset="0%" style="stop-color:#008000;stop-opacity:1"/>
+<stop offset="50%" style="stop-color:#00A651;stop-opacity:1"/>
+<stop offset="100%" style="stop-color:#008000;stop-opacity:1"/>
+</linearGradient>
+</defs>
+<rect width="400" height="600" fill="url(#sg)"/>
+<g id="p"></g>
+<g id="m" transform="translate(100, 300)">
+<rect x="-12" y="-16" width="24" height="32" fill="#FFD700"/>
+<rect x="-12" y="-16" width="24" height="6" fill="#8B4513"/>
+<rect x="-12" y="-10" width="4" height="14" fill="#8B4513"/>
+<rect x="8" y="-10" width="4" height="14" fill="#8B4513"/>
+<rect x="-6" y="-8" width="3" height="3" fill="#000"/>
+<rect x="3" y="-8" width="3" height="3" fill="#000"/>
+<rect x="-3" y="-1" width="6" height="2" fill="#FF69B4"/>
+<rect x="-12" y="8" width="24" height="8" fill="#FF69B4"/>
+<rect id="l" x="-18" y="0" width="8" height="4" fill="#FFD700">
+<animate id="la" attributeName="y" values="0;-4;0;4;0" dur="0.5s" repeatCount="indefinite" begin="indefinite"/>
+</rect>
+<rect id="r" x="10" y="0" width="8" height="4" fill="#FFD700">
+<animate id="ra" attributeName="y" values="0;4;0;-4;0" dur="0.5s" repeatCount="indefinite" begin="indefinite"/>
+</rect>
+</g>
+<text id="sc" x="20" y="40" font-family="Arial" font-size="20" fill="white">Score: 0</text>
+</svg>
+<div id="s">
+<h1>FlappyMarie</h1>
+<p>タップまたはスペースキーでMarieを飛ばし、パイプを避けよう！</p>
+<button id="b">スタート</button>
+<div id="v">v0.20</div>
+</div>
+<div id="o" style="display:none">
+<h1>Game Over</h1>
+<p id="f"></p>
+<button id="r" onclick="location.reload()">もう一度プレイ</button>
+<button id="h">結果をシェア</button>
+<p id="c">クリップボードにコピーしました！</p>
+<p id="t">九伊万里絵のSNSをチェックしよう！</p>
+<button id="i" onclick="window.open('https://www.instagram.com/coco9marie/','_blank')">@coco9marie</button>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',e=>{const s=document.getElementById('g'),m=document.getElementById('m'),p=document.getElementById('p'),l=document.getElementById('la'),r=document.getElementById('ra'),sc=document.getElementById('sc'),ss=document.getElementById('s'),gs=document.getElementById('o'),sb=document.getElementById('b'),shb=document.getElementById('h'),fs=document.getElementById('f'),cc=document.getElementById('c');let y=300,v=0,rot=0,scr=0,gs1=!1,g=.5,j=-10,pw=80,pg=200,mr=5,pi=[],gl,pit,ha=.5;function rs(){const wr=window.innerWidth/window.innerHeight,gr=400/600;s.style.width=wr<gr?'100vw':'auto';s.style.height=wr<gr?'auto':'100vh';document.body.style.height=`${window.innerHeight}px`}function cp(){const ph=Math.random()*300+100,tp=document.createElementNS("http://www.w3.org/2000/svg","g"),bp=document.createElementNS("http://www.w3.org/2000/svg","g");tp.innerHTML=`<rect width="${pw}" height="${ph}" fill="url(#pg)" stroke="#006400" stroke-width="2"/><rect x="0" y="${ph-20}" width="${pw}" height="20" fill="#006400"/><rect x="-5" y="${ph-25}" width="${pw+10}" height="25" fill="url(#pg)" stroke="#006400" stroke-width="2"/>`;bp.innerHTML=`<rect y="${ph+pg}" width="${pw}" height="${600-ph-pg}" fill="url(#pg)" stroke="#006400" stroke-width="2"/><rect x="0" y="${ph+pg}" width="${pw}" height="20" fill="#006400"/><rect x="-5" y="${ph+pg}" width="${pw+10}" height="25" fill="url(#pg)" stroke="#006400" stroke-width="2"/>`;tp.setAttribute("transform",`translate(400, 0)`);bp.setAttribute("transform",`translate(400, 0)`);p.appendChild(tp);p.appendChild(bp);pi.push({t:tp,b:bp,x:400,h:ph})}function mp(){pi.forEach((pipe,i)=>{pipe.x-=2;pipe.t.setAttribute("transform",`translate(${pipe.x}, 0)`);pipe.b.setAttribute("transform",`translate(${pipe.x}, 0)`);if(pipe.x+pw<0){p.removeChild(pipe.t);p.removeChild(pipe.b);pi.splice(i,1);scr++;sc.textContent=`Score: ${scr}`}if(pipe.x<100&&pipe.x+pw>100&&(y<pipe.h||y>pipe.h+pg)){go()}})}function go(){cancelAnimationFrame(gl);clearInterval(pit);sha();fs.textContent=`あなたのスコア: ${scr}`;gs.style.display='flex';let fr=0,fy=y;function fa(){fr+=10;fy+=10;m.setAttribute("transform",`translate(100, ${fy}) rotate(${fr}, 0, 0)`);if(fy<650){requestAnimationFrame(fa)}}fa()}function u(){if(!gs1)return;v+=g;y+=v;rot=Math.max(-45,Math.min(45,rot+Math.random()*10-5));m.setAttribute("transform",`translate(100, ${y}) rotate(${rot}, 0, 0)`);ha=v<0?.2:.5;l.setAttribute("dur",`${ha}s`);r.setAttribute("dur",`${ha}s`);if(y>600+mr||y<-mr){go();return}mp();gl=requestAnimationFrame(u)}function sta(){l.beginElement();r.beginElement()}function sha(){l.endElement();r.endElement()}function sg(){if(!gs1){gs1=!0;ss.style.display="none";cp();pit=setInterval(cp,3000);sta();u()}v=j}function sr(){const st=`FlappyMarieで${scr}点獲得しました！みんなも遊んでみよう！ http://hority.github.io/`;navigator.clipboard.writeText(st).then(()=>{cc.style.display='block';setTimeout(()=>{cc.style.display='none'},2000)})}s.addEventListener("touchstart",e=>{e.preventDefault();if(gs1){v=j}else{sg()}});document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();if(gs1){v=j}else{sg()}}});sb.addEventListener("click",sg);shb.addEventListener("click",sr);window.addEventListener('resize',rs);window.addEventListener('orientationchange',rs);rs();document.addEventListener('touchmove',e=>{e.preventDefault()},{passive:!1});document.addEventListener('wheel',e=>{e.preventDefault()},{passive:!1});sta()});
+</script>
 </body>
 </html>
