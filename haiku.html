@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ランダム俳句ジェネレーター</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Antique&family=Zen+Kaku+Gothic+New&family=Yuji+Mai&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Zen Kaku Gothic New", sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        @keyframes fadeSlideFromTop {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .container {
+            width: 98%;
+            max-width: 550px;
+            max-height: 98vh;
+            margin: 10px auto;
+            padding: 15px 10px;
+            text-align: center;
+            background-color: #fff9f0;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            position: relative;
+            box-sizing: border-box;
+            animation: fadeIn 0.8s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border: 1px solid #d4af37;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        h1 {
+            color: #333;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            margin: 0 auto 10px;
+            letter-spacing: 0.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: calc(min(1.8em, 4vh));
+            font-family: "Zen Antique", serif;
+        }
+
+        #haiku-display {
+            width: 320px;
+            height: 480px;
+            min-height: 480px;
+            margin: 0 auto;
+            padding: 15px 12px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 2em;
+            position: relative;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #canvas-container {
+            display: none;
+            position: absolute;
+            left: -9999px;
+        }
+
+        #haiku-display p {
+            font-size: 3.5em;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            min-height: 440px;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            font-family: "Yuji Mai", serif;
+            color: #1a1a1a;
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        #haiku-display p:nth-child(1) {
+            animation: fadeSlideFromTop 1.2s ease-out 2.4s forwards;
+        }
+
+        #haiku-display p:nth-child(2) {
+            animation: fadeSlideFromTop 1.5s ease-out 1.2s forwards;
+        }
+
+        #haiku-display p:nth-child(3) {
+            animation: fadeSlideFromTop 1.2s ease-out 0s forwards;
+        }
+
+        #haiku-display.fade-out p {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 12px;
+            padding-bottom: 2px;
+        }
+
+        #generate-btn, #copy-btn {
+            background-color: #d4af37;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-family: "Zen Kaku Gothic New", sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #copy-btn {
+            background-color: #5c9291;
+        }
+
+        #generate-btn:hover, #copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #copy-btn:hover {
+            background-color: #4a7472;
+        }
+
+        #generate-btn:hover {
+            background-color: #b4941f;
+        }
+
+        #generate-btn:active, #copy-btn:active {
+            transform: translateY(1px);
+        }
+
+        #copy-success {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(92, 146, 145, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 1.1em;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #copy-success.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media screen and (max-width: 480px) {
+            .container {
+                width: 95%;
+                margin: 8px auto;
+                padding: 10px 8px;
+            }
+
+            h1 {
+                writing-mode: horizontal-tb;
+                text-orientation: mixed;
+                letter-spacing: 0.1em;
+                margin-bottom: 6px;
+                font-size: calc(min(1.6em, 3.5vh));
+            }
+
+            #haiku-display {
+                width: 280px;
+                height: 400px;
+                min-height: 400px;
+                padding: 12px 8px;
+                gap: 1.5em;
+            }
+
+            #haiku-display p {
+                font-size: 2.8em;
+                min-height: 360px;
+            }
+
+            .button-container {
+                gap: 8px;
+                margin-top: 8px;
+                margin-bottom: 2px;
+            }
+
+            #generate-btn, #copy-btn {
+                padding: 8px 20px;
+                font-size: 1em;
+            }
+        }
+
+        @media screen and (max-width: 360px) {
+            .container {
+                width: 92%;
+                margin: 6px auto;
+                padding: 8px 6px;
+            }
+
+            h1 {
+                font-size: calc(min(1.4em, 3vh));
+                margin-bottom: 4px;
+            }
+
+            #haiku-display {
+                width: 260px;
+                height: 360px;
+                min-height: 360px;
+                padding: 10px 6px;
+                gap: 1.2em;
+            }
+
+            #haiku-display p {
+                font-size: 2.5em;
+                min-height: 320px;
+            }
+        }
+
+        @media screen and (max-height: 800px) {
+            .container {
+                margin: 5px auto;
+                padding: 10px 8px;
+            }
+            
+            h1 {
+                font-size: calc(min(1.6em, 3.5vh));
+                margin-bottom: 8px;
+            }
+            
+            #haiku-display {
+                padding: 10px 8px;
+            }
+            
+            #haiku-display p {
+                font-size: calc(min(3em, 7vh));
+            }
+
+            .button-container {
+                margin-top: 8px;
+            }
+        }
+
+        @media screen and (max-height: 600px) {
+            .container {
+                margin: 4px auto;
+                padding: 6px;
+            }
+            
+            h1 {
+                writing-mode: horizontal-tb;
+                text-orientation: mixed;
+                letter-spacing: 0.1em;
+                font-size: calc(min(1.4em, 3vh));
+                margin-bottom: 4px;
+            }
+            
+            #haiku-display {
+                width: 260px;
+                height: 320px;
+                min-height: 320px;
+                padding: 8px 6px;
+                gap: 1.5em;
+            }
+            
+            #haiku-display p {
+                font-size: 2.4em;
+                min-height: 280px;
+            }
+
+            .button-container {
+                margin-top: 4px;
+                margin-bottom: 1px;
+                gap: 6px;
+            }
+
+            #generate-btn, #copy-btn {
+                padding: 6px 20px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media screen and (max-height: 500px) {
+            .container {
+                margin: 2px auto;
+                padding: 4px;
+            }
+            
+            h1 {
+                font-size: calc(min(1.2em, 2.5vh));
+                margin-bottom: 3px;
+            }
+            
+            #haiku-display {
+                width: 240px;
+                height: 280px;
+                min-height: 280px;
+                padding: 6px 4px;
+                gap: 1.2em;
+            }
+            
+            #haiku-display p {
+                font-size: 2.2em;
+                min-height: 240px;
+            }
+
+            .button-container {
+                margin-top: 3px;
+                margin-bottom: 0;
+                gap: 4px;
+            }
+
+            #generate-btn, #copy-btn {
+                padding: 4px 15px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ランダム俳句</h1>
+        <div id="haiku-display">
+            <p id="line1"></p>
+            <p id="line2"></p>
+            <p id="line3"></p>
+        </div>
+        <div class="button-container">
+            <button id="generate-btn">新しい俳句</button>
+            <button id="copy-btn">画像としてコピー</button>
+        </div>
+        <div id="copy-success">コピーしました！</div>
+    </div>
+    <div id="canvas-container">
+        <canvas id="haiku-canvas"></canvas>
+    </div>
+    <script>
+        // 春の朝
+        // やわらかな光
+        // 差し込みぬ
+
+        // 言の葉を
+        // 配列に込めて
+        // 詠みゆかん
+        const words = {
+            seasonal: {
+                spring: {
+                    five: [
+                        '春風や', '桜散る', '蝶舞えば', '若葉かな', '春の雨',
+                        '霞たち', '菜の花や', '春の月', '雲雀鳴く', '春の海',
+                        '山笑う', '春の虹', '蛙飛ぶ', '春の夢', '梅の香や',
+                        '春の宵', '花筏', '春の野に', '春の丘', '春の川',
+                        '春の雲', '春の道', '春の池', '春の空', '春の朝'
+                    ],
+                    seven: [
+                        '野山萌え出づる', '春雨そぼ降り', '桜咲き誇り',
+                        '春風そよぎて', '若草もえて', '春の日永し',
+                        '霞たなびき', '春の川べに', '春の野に出で',
+                        '春の宵闇に', '桜舞い散り', '春の月昇り',
+                        '春の雨降りて', '蝶々舞いて', '若葉そよぎて'
+                    ]
+                },
+                summer: {
+                    five: [
+                        '夏の月', '蝉しぐれ', '入道雲', '波涼し', '夕立や',
+                        '朝顔や', '蛍飛ぶ', '浴衣着て', '風鈴や', '夏の星',
+                        '海開き', '夏の蝶', '雲の峰', '夏の川', '日傘さす',
+                        '夏の雲', '夏の山', '夏の空', '夏の夜', '夏の朝',
+                        '夏の海', '夏の池', '夏の風', '夏の雨', '夏の日'
+                    ],
+                    seven: [
+                        '蝉の声高く', '夏草しげりて', '夕立過ぎて',
+                        '入道雲湧き', '波のさざめき', '夏の日暮れて',
+                        '蛍飛び交い', '夏の風吹き', '海風涼し',
+                        '夏の雨降りて', '朝顔咲きて', '夏の月照り',
+                        '蝉時雨降り', '夏の日永し', '夕涼み待つ'
+                    ]
+                },
+                autumn: {
+                    five: [
+                        '秋の空', '紅葉して', '月見かな', '虫の声', '秋の風',
+                        '稲穂波', '秋の雨', '渡り鳥', '柿の実や', '秋の海',
+                        '菊の花', '秋の露', '案山子や', '秋の雲', '木の実落つ',
+                        '秋の山', '秋の月', '秋の夜', '秋の朝', '秋の川',
+                        '秋の池', '秋の道', '秋の虹', '秋の星', '秋の宵'
+                    ],
+                    seven: [
+                        '秋風そよぎて', '紅葉散りゆき', '月影さやか',
+                        '虫の音聞こえ', '稲穂たわわに', '秋雨しとど',
+                        '渡り鳥飛び', '秋の夜長に', '木の実落ちつつ',
+                        '秋の空晴れ', '秋の月昇り', '秋の風吹き',
+                        '秋の雨降りて', '虫の声響く', '紅葉舞い散る'
+                    ]
+                },
+                winter: {
+                    five: [
+                        '冬の日に', '雪降りて', '寒月や', '霜の朝', '木枯らし',
+                        '炬燵から', '冬の星', '氷柱垂れ', '北風や', '冬の雨',
+                        '師走かな', '冬の海', '寒椿', '冬の雲', '炉開いて',
+                        '冬の空', '冬の山', '冬の夜', '冬の朝', '冬の川',
+                        '冬の池', '冬の道', '冬の月', '冬の風', '冬の宵'
+                    ],
+                    seven: [
+                        '冬空澄みて', '雪の降りしき', '寒風吹きて',
+                        '氷柱きらめき', '冬の日暮れて', '霜の降りつつ',
+                        '木枯らし吹き', '師走せわしく', '炉辺にたたず',
+                        '冬の月照り', '寒風すさぶ', '冬の雨降り',
+                        '雪積もりて', '冬の星瞬く', '氷張る朝に'
+                    ]
+                }
+            },
+            non_seasonal: {
+                five: [
+                    'フロォよ', 'ビィトかな', 'ライムして', 'マイクもち', 'スキルあり',
+                    'リリック', '韻を踏む', '声あげ', 'ラップする', 'グルゥヴに',
+                    'マジやばい', 'ウケるって', 'チョォかわ', 'めっちゃいい', 'ナウいね',
+                    'イケてる', 'キラキラと', 'ガチだよ', 'マックスに', 'オシャレよ',
+                    'ヤバたにぇん', 'マジむり', 'カワイイね', 'サイコォよ', 'チョベリバ',
+                    'アゲアゲ', 'ドキドキと', 'ガチ恋よ', 'バリバリに', 'ハッピィよ'
+                ],
+                seven: [
+                    'ビィト刻みて', 'フロォ決めつつ', 'ライム重ねて',
+                    'マイク握りて', 'スキル磨きて', 'ラップ響かせ',
+                    'グルゥヴ感じ', 'ワァド紡ぎて', 'リズム乗りて',
+                    'マジやばくない', 'ウケるんですけど', 'チョォかわいい',
+                    'めっちゃ輝く', 'ガチ恋しちゃう', 'キラキラして',
+                    'イケてるでしょ', 'オシャレ極めて', 'ナウいけれど',
+                    'ヤバみが深くて', 'マジぱねぇけども', 'チョベリグだよ',
+                    'バリバリ進む', 'ガチ推しだから', 'アゲアゲして',
+                    'ハッピィでしょ', 'カワイイ極めて', 'チョォいいかも'
+                ]
+            }
+        };
+
+        // 季節より
+        // めぐりめぐりて
+        // 選びぬ
+        function getRandomWord(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // 五七五の
+        // リズムに乗せて
+        // 詠み出す
+        function generateHaiku() {
+            const haikuDisplay = document.getElementById('haiku-display');
+            haikuDisplay.classList.add('fade-out');
+            
+            setTimeout(() => {
+                const seasons = Object.keys(words.seasonal);
+                const season = seasons[Math.floor(Math.random() * seasons.length)];
+                
+                // 季語一つ
+                // 心を込めて
+                // 選びぬ
+                const seasonalPosition = Math.floor(Math.random() * 3);
+                
+                let line1, line2, line3;
+                
+                switch(seasonalPosition) {
+                    case 0:
+                        line1 = getRandomWord(words.seasonal[season].five);
+                        line2 = getRandomWord(words.non_seasonal.seven);
+                        line3 = getRandomWord(words.non_seasonal.five);
+                        break;
+                    case 1:
+                        line1 = getRandomWord(words.non_seasonal.five);
+                        line2 = getRandomWord(words.non_seasonal.seven);
+                        line3 = getRandomWord(words.seasonal[season].five);
+                        break;
+                    case 2:
+                        line1 = getRandomWord(words.non_seasonal.five);
+                        line2 = getRandomWord(words.non_seasonal.seven);
+                        line3 = getRandomWord(words.seasonal[season].five);
+                        break;
+                }
+                
+                document.getElementById('line1').textContent = line1;
+                document.getElementById('line2').textContent = line2;
+                document.getElementById('line3').textContent = line3;
+                
+                // 消えゆきて
+                // また現れる
+                // 言の葉よ
+                haikuDisplay.classList.remove('fade-out');
+                void haikuDisplay.offsetWidth;
+                
+                // 新たなる
+                // アニメーション
+                // 始まる
+                const lines = haikuDisplay.getElementsByTagName('p');
+                for (let line of lines) {
+                    line.style.animation = 'none';
+                    void line.offsetWidth;
+                    line.style.animation = '';
+                }
+            }, 500);
+        }
+
+        // 春の風
+        // ボタン押せしに
+        // 句生まる
+        document.getElementById('generate-btn').addEventListener('click', generateHaiku);
+        document.getElementById('copy-btn').addEventListener('click', copyHaikuAsImage);
+
+        // 画面開き
+        // 最初の句との
+        // 出会いかな
+        generateHaiku();
+
+        async function copyHaikuAsImage() {
+            const container = document.querySelector('.container');
+            const canvas = document.getElementById('haiku-canvas');
+            const ctx = canvas.getContext('2d');
+
+            try {
+                // キャンバスのサイズを設定（ボタン部分を除外）
+                canvas.width = 360; // 幅を維持
+                canvas.height = 680; // 全体の高さを少し増やす
+
+                // 背景を描画（角丸）
+                ctx.fillStyle = '#fff9f0';
+                roundRect(ctx, 0, 0, canvas.width, canvas.height, 8);
+                ctx.fill();
+
+                // 外側の影を描画
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+                ctx.shadowBlur = 15;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                roundRect(ctx, 0, 0, canvas.width, canvas.height, 8);
+                ctx.fill();
+
+                // 装飾的な枠を描画
+                ctx.shadowColor = 'transparent';
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 1;
+                roundRect(ctx, 8, 8, canvas.width - 16, canvas.height - 16, 4);
+                ctx.stroke();
+
+                // タイトルを縦書きで描画
+                ctx.font = "1.8em 'Zen Antique'";
+                ctx.fillStyle = '#333';
+                const title = 'ランダム俳句';
+                const titleX = canvas.width / 2;
+                let titleY = 35;
+                ctx.textAlign = 'center';
+                for (let char of title) {
+                    ctx.fillText(char, titleX, titleY);
+                    titleY += 25;
+                }
+
+                // 俳句本体の背景を描画（角丸）
+                ctx.fillStyle = '#fff';
+                const haikuY = titleY - 10;
+                const haikuHeight = 480; // 高さを増やす
+                const haikuWidth = canvas.width - 40;
+                const haikuX = 20;
+
+                // 内側の影を描画
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                roundRect(ctx, haikuX, haikuY, haikuWidth, haikuHeight, 4);
+                ctx.fill();
+
+                // 影をリセット
+                ctx.shadowColor = 'transparent';
+
+                // 俳句のテキストを描画
+                ctx.font = "3.5em 'Yuji Mai'";
+                ctx.fillStyle = '#1a1a1a';
+                const lines = [
+                    document.getElementById('line3').textContent,
+                    document.getElementById('line2').textContent,
+                    document.getElementById('line1').textContent
+                ];
+
+                // 縦書きで俳句を描画（行間と余白を調整）
+                const lineSpacing = 90; // 行間隔を維持
+                const charSpacing = 68;  // 文字間隔を維持
+                const totalWidth = (lines.length - 1) * lineSpacing;
+                const startX = canvas.width - ((canvas.width - totalWidth) / 2) - 5;
+                const startY = haikuY + 55;
+
+                lines.forEach((line, index) => {
+                    let x = startX - (index * lineSpacing);
+                    let y = startY;
+                    
+                    for (let char of line) {
+                        ctx.fillText(char, x, y);
+                        y += charSpacing;
+                    }
+                });
+
+                // 角丸の矩形を描画する関数
+                function roundRect(ctx, x, y, width, height, radius) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + radius, y);
+                    ctx.lineTo(x + width - radius, y);
+                    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                    ctx.lineTo(x + width, y + height - radius);
+                    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                    ctx.lineTo(x + radius, y + height);
+                    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                    ctx.lineTo(x, y + radius);
+                    ctx.quadraticCurveTo(x, y, x + radius, y);
+                    ctx.closePath();
+                }
+
+                // Canvasを画像に変換してクリップボードにコピー
+                canvas.toBlob(async (blob) => {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({
+                                'image/png': blob
+                            })
+                        ]);
+
+                        const successMsg = document.getElementById('copy-success');
+                        successMsg.classList.add('show');
+                        setTimeout(() => {
+                            successMsg.classList.remove('show');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('クリップボードへのコピーに失敗しました:', err);
+                        // フォールバック: ダウンロードとして提供
+                        const link = document.createElement('a');
+                        link.download = '俳句.png';
+                        link.href = URL.createObjectURL(blob);
+                        link.click();
+                        URL.revokeObjectURL(link.href);
+                    }
+                }, 'image/png');
+
+            } catch (err) {
+                console.error('画像の生成に失敗しました:', err);
+            }
+        }
+    </script>
+</body>
+</html> 
