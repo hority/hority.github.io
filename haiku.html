@@ -72,8 +72,8 @@
 
         h1 {
             color: #333;
-            writing-mode: vertical-rl;
-            text-orientation: upright;
+            writing-mode: horizontal-tb;
+            text-orientation: mixed;
             margin: 0 auto 10px;
             letter-spacing: 0.2em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -819,29 +819,32 @@
             const ctx = canvas.getContext('2d');
 
             try {
-                // フォントの読み込みを待つ
+                // 筆運び
+                // 文字の踊りを
+                // 待つ時間
                 await document.fonts.ready;
                 
-                // フォントの読み込み状態を確認
                 const zenAntiqueLoaded = document.fonts.check("1em 'Zen Antique'");
                 const yujiMaiLoaded = document.fonts.check("1em 'Yuji Mai'");
                 
                 if (!zenAntiqueLoaded || !yujiMaiLoaded) {
                     console.warn('フォントの読み込みが完了していません');
-                    // フォントが読み込まれるまで待機
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
 
-                // キャンバスのサイズを設定（ボタン部分を除外）
-                canvas.width = 360; // 幅を維持
-                canvas.height = 680; // 全体の高さを少し増やす
+                canvas.width = 360;
+                canvas.height = 680;
 
-                // 背景を描画（角丸）
+                // 紙の色
+                // 優しく染めて
+                // 背景に
                 ctx.fillStyle = '#fff9f0';
                 roundRect(ctx, 0, 0, canvas.width, canvas.height, 8);
                 ctx.fill();
 
-                // 外側の影を描画
+                // 影落ちて
+                // やわらかな光
+                // 紙の上
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
                 ctx.shadowBlur = 15;
                 ctx.shadowOffsetX = 0;
@@ -849,33 +852,36 @@
                 roundRect(ctx, 0, 0, canvas.width, canvas.height, 8);
                 ctx.fill();
 
-                // 装飾的な枠を描画
+                // 金の枠
+                // 俳句包みて
+                // 輝けり
                 ctx.shadowColor = 'transparent';
                 ctx.strokeStyle = '#d4af37';
                 ctx.lineWidth = 1;
                 roundRect(ctx, 8, 8, canvas.width - 16, canvas.height - 16, 4);
                 ctx.stroke();
 
-                // タイトルを縦書きで描画
+                // 墨流れて
+                // 文字が躍りだす
+                // 画面より
                 ctx.font = "1.8em 'Zen Antique'";
                 ctx.fillStyle = '#333';
                 const title = 'ランダム俳句';
-                const titleX = canvas.width / 2;
-                let titleY = 35;
                 ctx.textAlign = 'center';
-                for (let char of title) {
-                    ctx.fillText(char, titleX, titleY);
-                    titleY += 25;
-                }
+                ctx.fillText(title, canvas.width / 2, 40);
 
-                // 俳句本体の背景を描画（角丸）
+                // 白き紙
+                // 俳句待ちたる
+                // 余白かな
                 ctx.fillStyle = '#fff';
-                const haikuY = titleY - 10;
-                const haikuHeight = 480; // 高さを増やす
+                const haikuY = 60;
+                const haikuHeight = 480;
                 const haikuWidth = canvas.width - 40;
                 const haikuX = 20;
 
-                // 内側の影を描画
+                // 影添えて
+                // 文字の佇まい
+                // 引き立てる
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
                 ctx.shadowBlur = 10;
                 ctx.shadowOffsetX = 0;
@@ -883,10 +889,11 @@
                 roundRect(ctx, haikuX, haikuY, haikuWidth, haikuHeight, 4);
                 ctx.fill();
 
-                // 影をリセット
                 ctx.shadowColor = 'transparent';
 
-                // 俳句のテキストを描画
+                // 筆とりて
+                // 墨色濃くと
+                // 文描く
                 ctx.font = "3.5em 'Yuji Mai'";
                 ctx.fillStyle = '#1a1a1a';
                 const lines = [
@@ -895,9 +902,11 @@
                     document.getElementById('line1').textContent
                 ];
 
-                // 縦書きで俳句を描画（行間と余白を調整）
-                const lineSpacing = 90; // 行間隔を維持
-                const charSpacing = 68;  // 文字間隔を維持
+                // 縦に並ぶ
+                // 文字の間隔を
+                // 整えて
+                const lineSpacing = 90;
+                const charSpacing = 68;
                 const totalWidth = (lines.length - 1) * lineSpacing;
                 const startX = canvas.width - ((canvas.width - totalWidth) / 2) - 5;
                 const startY = haikuY + 55;
@@ -912,7 +921,9 @@
                     }
                 });
 
-                // 角丸の矩形を描画する関数
+                // 角丸めて
+                // やわらかき形
+                // 描きけり
                 function roundRect(ctx, x, y, width, height, radius) {
                     ctx.beginPath();
                     ctx.moveTo(x + radius, y);
@@ -927,7 +938,9 @@
                     ctx.closePath();
                 }
 
-                // Canvasを画像に変換してクリップボードにコピー
+                // 画像なる
+                // 記憶の中へと
+                // 保存す
                 canvas.toBlob(async (blob) => {
                     try {
                         await navigator.clipboard.write([
@@ -943,7 +956,6 @@
                         }, 2000);
                     } catch (err) {
                         console.error('クリップボードへのコピーに失敗しました:', err);
-                        // フォールバック: ダウンロードとして提供
                         const link = document.createElement('a');
                         link.download = '俳句.png';
                         link.href = URL.createObjectURL(blob);
