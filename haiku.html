@@ -690,6 +690,19 @@
             const ctx = canvas.getContext('2d');
 
             try {
+                // フォントの読み込みを待つ
+                await document.fonts.ready;
+                
+                // フォントの読み込み状態を確認
+                const zenAntiqueLoaded = document.fonts.check("1em 'Zen Antique'");
+                const yujiMaiLoaded = document.fonts.check("1em 'Yuji Mai'");
+                
+                if (!zenAntiqueLoaded || !yujiMaiLoaded) {
+                    console.warn('フォントの読み込みが完了していません');
+                    // フォントが読み込まれるまで待機
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+
                 // キャンバスのサイズを設定（ボタン部分を除外）
                 canvas.width = 360; // 幅を維持
                 canvas.height = 680; // 全体の高さを少し増やす
