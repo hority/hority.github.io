@@ -133,10 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameOver = false;
     let score = 0;
     let velocity = 0;
-    let gravity = 0.3;
-    let jumpForce = -6;
-    const pipeWidth = 2;
-    const pipeGap = 6;
+    let gravity = 0.25;
+    let jumpForce = -4;
+    const pipeWidth = 3;
+    const pipeGap = 8;
     const pipeDistance = 15;
     const pipeSpeed = 0.15;
     
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // カメラ作成
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 10);
+        camera.position.set(0, 0, 15);
         
         // レンダラー作成
         renderer = new THREE.WebGLRenderer({
@@ -380,9 +380,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // パイプの作成
     function createPipe() {
-        // ランダムな高さを決定
+        // ランダムな高さを決定 - より限定された範囲に
         const gap = pipeGap;
-        const height = Math.random() * 8 - 4; // -4から4までのランダムな値
+        const height = Math.random() * 6 - 3; // -3から3までのランダムな値
         
         // 上側のパイプ（グループ）
         const topPipe = new THREE.Group();
@@ -504,10 +504,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // パイプ生成のインターバル設定
         pipeInterval = setInterval(() => {
             if (!gameOver) createPipe();
-        }, 2000);
+        }, 2500);
         
         // アニメーション開始
         animate();
+        
+        // 自動的に最初のジャンプをトリガー
+        setTimeout(() => {
+            if (!gameOver) velocity = jumpForce;
+        }, 500);
     }
     
     // ゲームオーバー処理
