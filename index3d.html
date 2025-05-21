@@ -488,6 +488,31 @@ document.addEventListener('DOMContentLoaded', () => {
         gameOver = false;
         score = 0;
         scoreDisplay.textContent = `Score: ${score}`;
+        
+        // ゲーム開始時のヒントを表示
+        const hint = document.createElement('div');
+        hint.textContent = 'タップまたはスペースキーでジャンプ！';
+        hint.style.position = 'absolute';
+        hint.style.left = '50%';
+        hint.style.top = '20%';
+        hint.style.transform = 'translateX(-50%)';
+        hint.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        hint.style.color = 'white';
+        hint.style.padding = '10px';
+        hint.style.borderRadius = '5px';
+        hint.style.fontFamily = 'Arial, sans-serif';
+        hint.style.zIndex = '1000';
+        document.body.appendChild(hint);
+        
+        // 3秒後に非表示
+        setTimeout(() => {
+            hint.style.opacity = '0';
+            hint.style.transition = 'opacity 1s';
+            setTimeout(() => {
+                document.body.removeChild(hint);
+            }, 1000);
+        }, 3000);
+        
         startScreen.style.display = 'none';
         
         // 既存のパイプをクリア
