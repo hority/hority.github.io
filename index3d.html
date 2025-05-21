@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>FlappyMarie 3D</title>
+<!-- OGP メタタグ -->
+<meta property="og:title" content="FlappyMarie 3D - ここまりのAI製3Dゲーム">
+<meta property="og:description" content="伊万里のDX勉強会IX-Party（ナインパーティ）バーチャル広報担当ここまりのAI製3Dゲームで遊んでみよう！">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://hority.github.io/index3d.html">
+<meta property="og:image" content="http://hority.github.io/flappymarie-ogp.png">
+<meta property="og:site_name" content="FlappyMarie 3D">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Three.js ライブラリの読み込み -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    touch-action: none;
+}
+#c {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+#s, #o {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0,.7);
+    color: #fff;
+    text-align: center;
+}
+#s h1, #o h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+#s p, #o p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+#b, #r, #h, #i {
+    font-size: 20px;
+    padding: 10px 20px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin: 10px;
+    border-radius: 5px;
+}
+#b, #r {
+    background-color: #4CAF50;
+}
+#h {
+    background-color: #3b5998;
+}
+#i {
+    background-color: #E1306C;
+}
+#t {
+    font-size: 18px;
+    color: #fff;
+    margin-top: 20px;
+}
+#sc {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-size: 24px;
+    font-family: Arial, sans-serif;
+}
+#c {
+    display: none;
+    color: #4CAF50;
+    margin-top: 10px;
+}
+#v {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: #fff;
+    font-size: 14px;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="sc">Score: 0</div>
+<div id="s">
+<h1>FlappyMarie 3D</h1>
+<p>タップまたはスペースキーでMarieを飛ばし、パイプを避けよう！</p>
+<button id="b">スタート</button>
+<div id="v">v0.1</div>
+</div>
+<div id="o" style="display:none">
+<h1>Game Over</h1>
+<p id="f"></p>
+<button id="r" onclick="location.reload()">もう一度プレイ</button>
+<button id="h">結果をシェア</button>
+<p id="c">クリップボードにコピーしました！</p>
+<p id="t">九伊万里絵のSNSをチェックしよう！</p>
+<button id="i" onclick="window.open('https://www.instagram.com/coco9marie/','_blank')">@coco9marie</button>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM要素の取得
+    const canvas = document.getElementById('c');
+    const startScreen = document.getElementById('s');
+    const gameOverScreen = document.getElementById('o');
+    const startButton = document.getElementById('b');
+    const shareButton = document.getElementById('h');
+    const scoreDisplay = document.getElementById('sc');
+    const finalScoreDisplay = document.getElementById('f');
+    const clipboardConfirm = document.getElementById('c');
+
+    // ゲーム関連の変数
+    let scene, camera, renderer;
+    let marie, marieBox;
+    let pipes = [];
+    let gameStarted = false;
+    let gameOver = false;
+    let score = 0;
+    let velocity = 0;
+    let gravity = 0.3;
+    let jumpForce = -6;
+    const pipeWidth = 2;
+    const pipeGap = 6;
+    const pipeDistance = 15;
+    const pipeSpeed = 0.15;
+    
+    // Three.jsシーンの初期化
+    function initScene() {
+        // シーン作成
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // 背景色は空色
+        
+        // カメラ作成
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 10);
+        
+        // レンダラー作成
+        renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // 光源追加
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(0, 10, 10);
+        scene.add(directionalLight);
+        
+        // Marie作成
+        createMarie();
+        
+        // 地面と天井の作成
+        createBoundaries();
+        
+        // リサイズイベントのリスナー追加
+        window.addEventListener('resize', onWindowResize);
+    }
+    
+    // Marieの作成
+    function createMarie() {
+        // 簡単な3Dモデル（直方体で代用）
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const materials = [
+            new THREE.MeshBasicMaterial({ color: 0xFFD700 }), // 黄色（金）
+            new THREE.MeshBasicMaterial({ color: 0xFFD700 }),
+            new THREE.MeshBasicMaterial({ color: 0x8B4513 }), // 茶色（頭部）
+            new THREE.MeshBasicMaterial({ color: 0xFF69B4 }), // ピンク（服）
+            new THREE.MeshBasicMaterial({ color: 0xFFD700 }),
+            new THREE.MeshBasicMaterial({ color: 0xFFD700 })
+        ];
+        marie = new THREE.Mesh(geometry, materials);
+        marie.position.set(-4, 0, 0);
+        scene.add(marie);
+        
+        // 衝突判定用のバウンディングボックス
+        marieBox = new THREE.Box3().setFromObject(marie);
+    }
+    
+    // 地面と天井の作成
+    function createBoundaries() {
+        // 地面（下限）
+        const floorGeometry = new THREE.BoxGeometry(100, 0.5, 5);
+        const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.position.set(0, -8, 0);
+        scene.add(floor);
+        
+        // 天井（上限）
+        const ceilingGeometry = new THREE.BoxGeometry(100, 0.5, 5);
+        const ceilingMaterial = new THREE.MeshBasicMaterial({ color: 0x4A90E2 });
+        const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+        ceiling.position.set(0, 8, 0);
+        scene.add(ceiling);
+    }
+    
+    // パイプの作成
+    function createPipe() {
+        // ランダムな高さを決定
+        const gap = pipeGap;
+        const height = Math.random() * 8 - 4; // -4から4までのランダムな値
+        
+        // 上側のパイプ
+        const topPipeHeight = 8 - (height + gap / 2);
+        const topPipeGeometry = new THREE.BoxGeometry(pipeWidth, topPipeHeight, 2);
+        const topPipeMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
+        const topPipe = new THREE.Mesh(topPipeGeometry, topPipeMaterial);
+        topPipe.position.set(10, 8 - topPipeHeight / 2, 0);
+        scene.add(topPipe);
+        
+        // 下側のパイプ
+        const bottomPipeHeight = 8 + (height - gap / 2);
+        const bottomPipeGeometry = new THREE.BoxGeometry(pipeWidth, bottomPipeHeight, 2);
+        const bottomPipeMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
+        const bottomPipe = new THREE.Mesh(bottomPipeGeometry, bottomPipeMaterial);
+        bottomPipe.position.set(10, -8 + bottomPipeHeight / 2, 0);
+        scene.add(bottomPipe);
+        
+        // 配列に追加
+        pipes.push({
+            top: { mesh: topPipe, box: new THREE.Box3().setFromObject(topPipe) },
+            bottom: { mesh: bottomPipe, box: new THREE.Box3().setFromObject(bottomPipe) },
+            passed: false
+        });
+    }
+    
+    // パイプの移動
+    function movePipes() {
+        for (let i = pipes.length - 1; i >= 0; i--) {
+            const pipe = pipes[i];
+            
+            // パイプを左に動かす
+            pipe.top.mesh.position.x -= pipeSpeed;
+            pipe.bottom.mesh.position.x -= pipeSpeed;
+            
+            // バウンディングボックスを更新
+            pipe.top.box.setFromObject(pipe.top.mesh);
+            pipe.bottom.box.setFromObject(pipe.bottom.mesh);
+            
+            // パイプを通過したらスコア加算
+            if (!pipe.passed && pipe.top.mesh.position.x < -4) {
+                pipe.passed = true;
+                updateScore();
+            }
+            
+            // 画面外に出たパイプを削除
+            if (pipe.top.mesh.position.x < -10) {
+                scene.remove(pipe.top.mesh);
+                scene.remove(pipe.bottom.mesh);
+                pipes.splice(i, 1);
+            }
+        }
+    }
+    
+    // スコア更新
+    function updateScore() {
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+    }
+    
+    // マリーのジャンプ
+    function jump() {
+        if (gameOver) return;
+        
+        if (!gameStarted) {
+            startGame();
+            return;
+        }
+        
+        velocity = jumpForce;
+    }
+    
+    // ゲーム開始
+    function startGame() {
+        gameStarted = true;
+        gameOver = false;
+        score = 0;
+        scoreDisplay.textContent = `Score: ${score}`;
+        startScreen.style.display = 'none';
+        
+        // 既存のパイプをクリア
+        for (const pipe of pipes) {
+            scene.remove(pipe.top.mesh);
+            scene.remove(pipe.bottom.mesh);
+        }
+        pipes = [];
+        
+        // Marieの位置をリセット
+        marie.position.set(-4, 0, 0);
+        velocity = 0;
+        
+        // パイプ生成のインターバル設定
+        pipeInterval = setInterval(() => {
+            if (!gameOver) createPipe();
+        }, 2000);
+        
+        // アニメーション開始
+        animate();
+    }
+    
+    // ゲームオーバー処理
+    function endGame() {
+        gameOver = true;
+        finalScoreDisplay.textContent = `あなたのスコア: ${score}`;
+        gameOverScreen.style.display = 'flex';
+        clearInterval(pipeInterval);
+    }
+    
+    // 結果をシェア
+    function shareResult() {
+        const shareText = `FlappyMarie 3Dで${score}点獲得しました！みんなも遊んでみよう！ http://hority.github.io/index3d.html`;
+        navigator.clipboard.writeText(shareText).then(() => {
+            clipboardConfirm.style.display = 'block';
+            setTimeout(() => {
+                clipboardConfirm.style.display = 'none';
+            }, 2000);
+        });
+    }
+    
+    // 衝突判定
+    function checkCollisions() {
+        // バウンディングボックスを更新
+        marieBox.setFromObject(marie);
+        
+        // 地面と天井の衝突判定
+        if (marie.position.y < -7.5 || marie.position.y > 7.5) {
+            endGame();
+            return;
+        }
+        
+        // パイプとの衝突判定
+        for (const pipe of pipes) {
+            if (marieBox.intersectsBox(pipe.top.box) || marieBox.intersectsBox(pipe.bottom.box)) {
+                endGame();
+                return;
+            }
+        }
+    }
+    
+    // 画面リサイズ時の処理
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    // アニメーションループ
+    function animate() {
+        if (gameOver) return;
+        
+        requestAnimationFrame(animate);
+        
+        if (gameStarted) {
+            // 重力と速度を適用
+            velocity += gravity;
+            marie.position.y -= velocity * 0.1;
+            
+            // Marieの回転（上向きと下向きに応じて）
+            marie.rotation.z = Math.max(-0.5, Math.min(0.5, -velocity * 0.05));
+            
+            // パイプの移動
+            movePipes();
+            
+            // 衝突判定
+            checkCollisions();
+        }
+        
+        // シーンをレンダリング
+        renderer.render(scene, camera);
+    }
+    
+    // イベントリスナーの設定
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            jump();
+        }
+    });
+    
+    canvas.addEventListener('click', jump);
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        jump();
+    });
+    
+    startButton.addEventListener('click', startGame);
+    shareButton.addEventListener('click', shareResult);
+    
+    // タッチイベントのデフォルト動作を防ぐ
+    document.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('wheel', (e) => {
+        e.preventDefault();
+    }, { passive: false });
+    
+    // Canvasを表示
+    canvas.style.display = 'block';
+    
+    // シーンの初期化
+    initScene();
+});
+</script>
+</body>
+</html>
