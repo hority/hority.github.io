@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>FlappyMarie 3D</title>
+<!-- OGP メタタグ -->
+<meta property="og:title" content="FlappyMarie 3D - ここまりのAI製3Dゲーム">
+<meta property="og:description" content="伊万里のDX勉強会IX-Party（ナインパーティ）バーチャル広報担当ここまりのAI製3Dゲームで遊んでみよう！">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://hority.github.io/index3d.html">
+<meta property="og:image" content="http://hority.github.io/flappymarie-ogp.png">
+<meta property="og:site_name" content="FlappyMarie 3D">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Three.js ライブラリの読み込み -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    touch-action: none;
+}
+#c {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+#s, #o {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0,.7);
+    color: #fff;
+    text-align: center;
+}
+#s h1, #o h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+#s p, #o p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+#b, #r, #h, #i {
+    font-size: 20px;
+    padding: 10px 20px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin: 10px;
+    border-radius: 5px;
+}
+#b, #r {
+    background-color: #4CAF50;
+}
+#h {
+    background-color: #3b5998;
+}
+#i {
+    background-color: #E1306C;
+}
+#t {
+    font-size: 18px;
+    color: #fff;
+    margin-top: 20px;
+}
+#sc {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-size: 24px;
+    font-family: Arial, sans-serif;
+}
+#c {
+    display: none;
+    color: #4CAF50;
+    margin-top: 10px;
+}
+#v {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: #fff;
+    font-size: 14px;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="sc">Score: 0</div>
+<div id="s">
+<h1>FlappyMarie 3D</h1>
+<p>タップまたはスペースキーでMarieを飛ばし、パイプを避けよう！</p>
+<button id="b">スタート</button>
+<a href="index.html" style="color: white; text-decoration: underline; margin-top: 10px;">2Dバージョンへ</a>
+<div id="v">v0.3</div>
+</div>
+<div id="o" style="display:none">
+<h1>Game Over</h1>
+<p id="f"></p>
+<button id="r" onclick="location.reload()">もう一度プレイ</button>
+<button id="h">結果をシェア</button>
+<p id="c">クリップボードにコピーしました！</p>
+<p id="t">九伊万里絵のSNSをチェックしよう！</p>
+<button id="i" onclick="window.open('https://www.instagram.com/coco9marie/','_blank')">@coco9marie</button>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM要素の取得
+    const canvas = document.getElementById('c');
+    const startScreen = document.getElementById('s');
+    const gameOverScreen = document.getElementById('o');
+    const startButton = document.getElementById('b');
+    const shareButton = document.getElementById('h');
+    const scoreDisplay = document.getElementById('sc');
+    const finalScoreDisplay = document.getElementById('f');
+    const clipboardConfirm = document.getElementById('c');
+
+    // ゲーム関連の変数
+    let scene, camera, renderer;
+    let marie, marieBox;
+    let pipes = [];
+    let gameStarted = false;
+    let gameOver = false;
+    let score = 0;
+    let velocity = 0;
+    let gravity = 0.3;
+    let jumpForce = -6;
+    const pipeWidth = 2;
+    const pipeGap = 6;
+    const pipeDistance = 15;
+    const pipeSpeed = 0.15;
+    
+    // Three.jsシーンの初期化
+    function initScene() {
+        // シーン作成
+        scene = new THREE.Scene();
+        
+        // 空のグラデーション背景
+        const skyGeometry = new THREE.PlaneGeometry(100, 20);
+        const skyMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                topColor: { value: new THREE.Color(0x4A90E2) },
+                bottomColor: { value: new THREE.Color(0x87CEEB) }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 topColor;
+                uniform vec3 bottomColor;
+                varying vec2 vUv;
+                void main() {
+                    gl_FragColor = vec4(mix(bottomColor, topColor, vUv.y), 1.0);
+                }
+            `
+        });
+        const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+        sky.position.set(0, 0, -10);
+        scene.add(sky);
+        
+        // カメラ作成
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 10);
+        
+        // レンダラー作成
+        renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        // 光源追加
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 10);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 30;
+        directionalLight.shadow.camera.left = -10;
+        directionalLight.shadow.camera.right = 10;
+        directionalLight.shadow.camera.top = 10;
+        directionalLight.shadow.camera.bottom = -10;
+        directionalLight.shadow.mapSize.width = 1024;
+        directionalLight.shadow.mapSize.height = 1024;
+        scene.add(directionalLight);
+        
+        // Marie作成
+        createMarie();
+        
+        // 地面と天井の作成
+        createBoundaries();
+        
+        // リサイズイベントのリスナー追加
+        window.addEventListener('resize', onWindowResize);
+    }
+    
+    // Marieの作成
+    function createMarie() {
+        // Marie本体のグループ
+        marie = new THREE.Group();
+        marie.position.set(-4, 0, 0);
+        
+        // 本体（黄色）
+        const bodyGeometry = new THREE.BoxGeometry(1.2, 1.6, 1);
+        const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xFFD700 });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.castShadow = true;
+        marie.add(body);
+        
+        // 髪/帽子（茶色）
+        const hatGeometry = new THREE.BoxGeometry(1.2, 0.4, 1);
+        const hatMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+        const hat = new THREE.Mesh(hatGeometry, hatMaterial);
+        hat.position.y = 0.8;
+        hat.castShadow = true;
+        marie.add(hat);
+        
+        // 左目（黒）
+        const leftEyeGeometry = new THREE.BoxGeometry(0.15, 0.15, 0.1);
+        const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+        const leftEye = new THREE.Mesh(leftEyeGeometry, eyeMaterial);
+        leftEye.position.set(-0.3, 0.4, 0.5);
+        leftEye.castShadow = true;
+        marie.add(leftEye);
+        
+        // 右目（黒）
+        const rightEyeGeometry = new THREE.BoxGeometry(0.15, 0.15, 0.1);
+        const rightEye = new THREE.Mesh(rightEyeGeometry, eyeMaterial);
+        rightEye.position.set(0.3, 0.4, 0.5);
+        rightEye.castShadow = true;
+        marie.add(rightEye);
+        
+        // 口（ピンク）
+        const mouthGeometry = new THREE.BoxGeometry(0.3, 0.1, 0.1);
+        const mouthMaterial = new THREE.MeshLambertMaterial({ color: 0xFF69B4 });
+        const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
+        mouth.position.set(0, 0.1, 0.5);
+        mouth.castShadow = true;
+        marie.add(mouth);
+        
+        // 服（ピンク）
+        const clothesGeometry = new THREE.BoxGeometry(1.2, 0.4, 1);
+        const clothesMaterial = new THREE.MeshLambertMaterial({ color: 0xFF69B4 });
+        const clothes = new THREE.Mesh(clothesGeometry, clothesMaterial);
+        clothes.position.y = -0.6;
+        clothes.castShadow = true;
+        marie.add(clothes);
+        
+        // 左羽（黄色）
+        const leftWingGeometry = new THREE.BoxGeometry(0.4, 0.2, 0.8);
+        const wingMaterial = new THREE.MeshLambertMaterial({ color: 0xFFD700 });
+        const leftWing = new THREE.Mesh(leftWingGeometry, wingMaterial);
+        leftWing.position.set(-0.8, 0, 0);
+        leftWing.castShadow = true;
+        marie.add(leftWing);
+        
+        // 右羽（黄色）
+        const rightWingGeometry = new THREE.BoxGeometry(0.4, 0.2, 0.8);
+        const rightWing = new THREE.Mesh(rightWingGeometry, wingMaterial);
+        rightWing.position.set(0.8, 0, 0);
+        rightWing.castShadow = true;
+        marie.add(rightWing);
+        
+        scene.add(marie);
+        
+        // 衝突判定用のバウンディングボックス
+        marieBox = new THREE.Box3().setFromObject(marie);
+    }
+    
+    // 地面と天井の作成
+    function createBoundaries() {
+        // 地面（下限）- 草地のような見た目
+        const floorGeometry = new THREE.BoxGeometry(100, 0.5, 5);
+        const floorMaterial = new THREE.MeshLambertMaterial({ 
+            color: 0x00A651,
+            map: createGrassTexture()
+        });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.position.set(0, -8, 0);
+        floor.receiveShadow = true;
+        scene.add(floor);
+        
+        // 地面の縁（暗い緑）
+        const floorEdgeGeometry = new THREE.BoxGeometry(100, 0.3, 5.2);
+        const floorEdgeMaterial = new THREE.MeshLambertMaterial({ color: 0x008000 });
+        const floorEdge = new THREE.Mesh(floorEdgeGeometry, floorEdgeMaterial);
+        floorEdge.position.set(0, -7.75, 0);
+        floorEdge.receiveShadow = true;
+        scene.add(floorEdge);
+        
+        // 天井（上限）- 雲のような見た目
+        const ceilingGeometry = new THREE.BoxGeometry(100, 0.5, 5);
+        const ceilingMaterial = new THREE.MeshLambertMaterial({ 
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.8,
+            map: createCloudTexture()
+        });
+        const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+        ceiling.position.set(0, 8, 0);
+        ceiling.receiveShadow = true;
+        scene.add(ceiling);
+    }
+    
+    // 草のテクスチャを作成
+    function createGrassTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        
+        // 背景を緑に
+        ctx.fillStyle = '#00A651';
+        ctx.fillRect(0, 0, 128, 128);
+        
+        // ランダムな草の模様を描画
+        ctx.fillStyle = '#008000';
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * 128;
+            const y = Math.random() * 128;
+            const width = 1 + Math.random() * 3;
+            const height = 2 + Math.random() * 6;
+            ctx.fillRect(x, y, width, height);
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(10, 1);
+        return texture;
+    }
+    
+    // 雲のテクスチャを作成
+    function createCloudTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        
+        // 背景を透明に
+        ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+        ctx.fillRect(0, 0, 128, 128);
+        
+        // 雲の形を描画
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        for (let i = 0; i < 8; i++) {
+            const x = Math.random() * 128;
+            const y = Math.random() * 128;
+            const radius = 10 + Math.random() * 20;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(10, 1);
+        return texture;
+    }
+    
+    // パイプの作成
+    function createPipe() {
+        // ランダムな高さを決定
+        const gap = pipeGap;
+        const height = Math.random() * 8 - 4; // -4から4までのランダムな値
+        
+        // 上側のパイプ（グループ）
+        const topPipe = new THREE.Group();
+        const topPipeHeight = 8 - (height + gap / 2);
+        
+        // メインの上側のパイプ
+        const topPipeMainGeometry = new THREE.BoxGeometry(pipeWidth, topPipeHeight - 0.5, 2);
+        const pipeMaterial = new THREE.MeshLambertMaterial({ color: 0x008000 });
+        const topPipeMain = new THREE.Mesh(topPipeMainGeometry, pipeMaterial);
+        topPipeMain.position.y = -0.25;
+        topPipeMain.castShadow = true;
+        topPipe.add(topPipeMain);
+        
+        // 上側パイプの縁（暗い緑）
+        const topPipeEdgeGeometry = new THREE.BoxGeometry(pipeWidth + 0.5, 0.5, 2.2);
+        const pipeEdgeMaterial = new THREE.MeshLambertMaterial({ color: 0x006400 });
+        const topPipeEdge = new THREE.Mesh(topPipeEdgeGeometry, pipeEdgeMaterial);
+        topPipeEdge.position.y = -(topPipeHeight / 2) + 0.25;
+        topPipeEdge.castShadow = true;
+        topPipe.add(topPipeEdge);
+        
+        topPipe.position.set(10, 8 - topPipeHeight / 2, 0);
+        scene.add(topPipe);
+        
+        // 下側のパイプ（グループ）
+        const bottomPipe = new THREE.Group();
+        const bottomPipeHeight = 8 + (height - gap / 2);
+        
+        // メインの下側のパイプ
+        const bottomPipeMainGeometry = new THREE.BoxGeometry(pipeWidth, bottomPipeHeight - 0.5, 2);
+        const bottomPipeMain = new THREE.Mesh(bottomPipeMainGeometry, pipeMaterial);
+        bottomPipeMain.position.y = 0.25;
+        bottomPipeMain.castShadow = true;
+        bottomPipe.add(bottomPipeMain);
+        
+        // 下側パイプの縁（暗い緑）
+        const bottomPipeEdgeGeometry = new THREE.BoxGeometry(pipeWidth + 0.5, 0.5, 2.2);
+        const bottomPipeEdge = new THREE.Mesh(bottomPipeEdgeGeometry, pipeEdgeMaterial);
+        bottomPipeEdge.position.y = (bottomPipeHeight / 2) - 0.25;
+        bottomPipeEdge.castShadow = true;
+        bottomPipe.add(bottomPipeEdge);
+        
+        bottomPipe.position.set(10, -8 + bottomPipeHeight / 2, 0);
+        scene.add(bottomPipe);
+        
+        // 配列に追加
+        pipes.push({
+            top: { mesh: topPipe, box: new THREE.Box3().setFromObject(topPipe) },
+            bottom: { mesh: bottomPipe, box: new THREE.Box3().setFromObject(bottomPipe) },
+            passed: false
+        });
+    }
+    
+    // パイプの移動
+    function movePipes() {
+        for (let i = pipes.length - 1; i >= 0; i--) {
+            const pipe = pipes[i];
+            
+            // パイプを左に動かす
+            pipe.top.mesh.position.x -= pipeSpeed;
+            pipe.bottom.mesh.position.x -= pipeSpeed;
+            
+            // バウンディングボックスを更新
+            pipe.top.box.setFromObject(pipe.top.mesh);
+            pipe.bottom.box.setFromObject(pipe.bottom.mesh);
+            
+            // パイプを通過したらスコア加算
+            if (!pipe.passed && pipe.top.mesh.position.x < -4) {
+                pipe.passed = true;
+                updateScore();
+            }
+            
+            // 画面外に出たパイプを削除
+            if (pipe.top.mesh.position.x < -10) {
+                scene.remove(pipe.top.mesh);
+                scene.remove(pipe.bottom.mesh);
+                pipes.splice(i, 1);
+            }
+        }
+    }
+    
+    // スコア更新
+    function updateScore() {
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+    }
+    
+    // マリーのジャンプ
+    function jump() {
+        if (gameOver) return;
+        
+        if (!gameStarted) {
+            startGame();
+            return;
+        }
+        
+        velocity = jumpForce;
+    }
+    
+    // ゲーム開始
+    function startGame() {
+        gameStarted = true;
+        gameOver = false;
+        score = 0;
+        scoreDisplay.textContent = `Score: ${score}`;
+        startScreen.style.display = 'none';
+        
+        // 既存のパイプをクリア
+        for (const pipe of pipes) {
+            scene.remove(pipe.top.mesh);
+            scene.remove(pipe.bottom.mesh);
+        }
+        pipes = [];
+        
+        // Marieの位置をリセット
+        marie.position.set(-4, 0, 0);
+        velocity = 0;
+        
+        // パイプ生成のインターバル設定
+        pipeInterval = setInterval(() => {
+            if (!gameOver) createPipe();
+        }, 2000);
+        
+        // アニメーション開始
+        animate();
+    }
+    
+    // ゲームオーバー処理
+    function endGame() {
+        gameOver = true;
+        finalScoreDisplay.textContent = `あなたのスコア: ${score}`;
+        gameOverScreen.style.display = 'flex';
+        clearInterval(pipeInterval);
+    }
+    
+    // 結果をシェア
+    function shareResult() {
+        const shareText = `FlappyMarie 3Dで${score}点獲得しました！みんなも遊んでみよう！ http://hority.github.io/index3d.html`;
+        navigator.clipboard.writeText(shareText).then(() => {
+            clipboardConfirm.style.display = 'block';
+            setTimeout(() => {
+                clipboardConfirm.style.display = 'none';
+            }, 2000);
+        });
+    }
+    
+    // 衝突判定
+    function checkCollisions() {
+        // バウンディングボックスを更新
+        marieBox.setFromObject(marie);
+        
+        // 地面と天井の衝突判定
+        if (marie.position.y < -7.5 || marie.position.y > 7.5) {
+            endGame();
+            return;
+        }
+        
+        // パイプとの衝突判定
+        for (const pipe of pipes) {
+            if (marieBox.intersectsBox(pipe.top.box) || marieBox.intersectsBox(pipe.bottom.box)) {
+                endGame();
+                return;
+            }
+        }
+    }
+    
+    // 画面リサイズ時の処理
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    // アニメーションループ
+    function animate() {
+        if (gameOver) return;
+        
+        requestAnimationFrame(animate);
+        
+        if (gameStarted) {
+            // 重力と速度を適用
+            velocity += gravity;
+            marie.position.y -= velocity * 0.1;
+            
+            // Marieの回転（上向きと下向きに応じて）
+            marie.rotation.z = Math.max(-0.5, Math.min(0.5, -velocity * 0.05));
+            
+            // 羽のアニメーション
+            animateWings();
+            
+            // パイプの移動
+            movePipes();
+            
+            // 衝突判定
+            checkCollisions();
+        }
+        
+        // シーンをレンダリング
+        renderer.render(scene, camera);
+    }
+    
+    // 羽のアニメーション
+    let wingDirection = 1;
+    let wingTime = 0;
+    function animateWings() {
+        // Marie本体のグループの子要素にアクセス
+        const leftWing = marie.children[6]; // 左羽
+        const rightWing = marie.children[7]; // 右羽
+        
+        // 羽ばたきのアニメーション
+        wingTime += 0.1;
+        const offset = Math.sin(wingTime) * 0.2;
+        
+        // 左右の羽を反対方向に動かす
+        leftWing.rotation.y = -offset;
+        rightWing.rotation.y = offset;
+    }
+    
+    // イベントリスナーの設定
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            jump();
+        }
+    });
+    
+    canvas.addEventListener('click', jump);
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        jump();
+    });
+    
+    startButton.addEventListener('click', startGame);
+    shareButton.addEventListener('click', shareResult);
+    
+    // タッチイベントのデフォルト動作を防ぐ
+    document.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('wheel', (e) => {
+        e.preventDefault();
+    }, { passive: false });
+    
+    // Canvasを表示
+    canvas.style.display = 'block';
+    
+    // シーンの初期化
+    initScene();
+});
+</script>
+</body>
+</html>
