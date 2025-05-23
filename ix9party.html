@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" id="html-lang">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
@@ -318,7 +318,7 @@ footer {
         <div class="container">
             <div class="header-content">
                 <h1 class="site-title">IX-Party（ナインパーティ）</h1>
-                <p class="site-description">伊万里のDX勉強会</p>
+                <p class="site-description" data-lang-key="site-description">伊万里のDX勉強会</p>
             </div>
         </div>
     </header>
@@ -326,32 +326,33 @@ footer {
     <nav>
         <div class="container">
             <ul>
-                <li><a href="#about">概要</a></li>
-                <li><a href="#mascot">マスコット</a></li>
-                <li><a href="#games">ゲーム</a></li>
+                <li><a href="#about" data-lang-key="menu-about">概要</a></li>
+                <li><a href="#mascot" data-lang-key="menu-mascot">マスコット</a></li>
+                <li><a href="#games" data-lang-key="menu-games">ゲーム</a></li>
                 <li><a href="index.html">FlappyMarie</a></li>
                 <li><a href="index3d.html">FlappyMarie 3D</a></li>
-                <li><a href="haiku.html">俳句ジェネレーター</a></li>
+                <li><a href="haiku.html" data-lang-key="menu-haiku">俳句ジェネレーター</a></li>
+                <li><a href="#" id="lang-switch" data-lang-key="lang-switch">English</a></li>
             </ul>
         </div>
     </nav>
     
     <section class="hero">
         <div class="container">
-            <h1>伊万里からDXを推進する勉強会</h1>
-            <p>IX-Party（ナインパーティ）は、伊万里市を拠点にデジタルトランスフォーメーション（DX）を学び、推進するコミュニティです。最新技術を活用し、地域の課題解決と発展に取り組んでいます。</p>
-            <a href="#about" class="button">詳細を見る</a>
+            <h1 data-lang-key="hero-title">伊万里からDXを推進する勉強会</h1>
+            <p data-lang-key="hero-description">IX-Party（ナインパーティ）は、伊万里市を拠点にデジタルトランスフォーメーション（DX）を学び、推進するコミュニティです。最新技術を活用し、地域の課題解決と発展に取り組んでいます。</p>
+            <a href="#about" class="button" data-lang-key="see-details">詳細を見る</a>
         </div>
     </section>
     
     <section id="about" class="section">
         <div class="container">
-            <h2 class="section-title">IX-Partyについて</h2>
+            <h2 class="section-title" data-lang-key="about-title">IX-Partyについて</h2>
             <div class="about-content">
                 <div class="about-text">
-                    <p>IX-Party（ナインパーティ）は、佐賀県伊万里市を拠点に活動するDX勉強会です。地域の企業や個人が集まり、最新のデジタル技術やAIについて学び、実践することを目的としています。</p>
-                    <p>私たちは定期的な勉強会やワークショップを通じて、参加者のスキルアップとネットワーキングを促進しています。また、学んだ技術を活用して地域の課題解決に取り組むプロジェクトも実施しています。</p>
-                    <p>初心者から専門家まで、デジタル技術に興味のあるすべての方が参加できるオープンなコミュニティです。</p>
+                    <p data-lang-key="about-p1">IX-Party（ナインパーティ）は、佐賀県伊万里市を拠点に活動するDX勉強会です。地域の企業や個人が集まり、最新のデジタル技術やAIについて学び、実践することを目的としています。</p>
+                    <p data-lang-key="about-p2">私たちは定期的な勉強会やワークショップを通じて、参加者のスキルアップとネットワーキングを促進しています。また、学んだ技術を活用して地域の課題解決に取り組むプロジェクトも実施しています。</p>
+                    <p data-lang-key="about-p3">初心者から専門家まで、デジタル技術に興味のあるすべての方が参加できるオープンなコミュニティです。</p>
                 </div>
                 <div class="about-image">
                     <img src="flappymarie-ogp.png" alt="IX-Party活動イメージ" width="400">
@@ -360,16 +361,16 @@ footer {
             
             <div class="features">
                 <div class="feature">
-                    <h3>定期勉強会</h3>
-                    <p>月に一度の定期勉強会では、AIやデジタル技術に関する最新トピックを取り上げ、知識共有やディスカッションを行っています。</p>
+                    <h3 data-lang-key="feature1-title">定期勉強会</h3>
+                    <p data-lang-key="feature1-desc">月に一度の定期勉強会では、AIやデジタル技術に関する最新トピックを取り上げ、知識共有やディスカッションを行っています。</p>
                 </div>
                 <div class="feature">
-                    <h3>ワークショップ</h3>
-                    <p>実践的なワークショップを通じて、参加者が新しい技術やツールを体験し、スキルを向上させる機会を提供しています。</p>
+                    <h3 data-lang-key="feature2-title">ワークショップ</h3>
+                    <p data-lang-key="feature2-desc">実践的なワークショップを通じて、参加者が新しい技術やツールを体験し、スキルを向上させる機会を提供しています。</p>
                 </div>
                 <div class="feature">
-                    <h3>地域プロジェクト</h3>
-                    <p>地域の課題解決に向けたプロジェクトを企画・実施し、デジタル技術を活用した地域活性化に取り組んでいます。</p>
+                    <h3 data-lang-key="feature3-title">地域プロジェクト</h3>
+                    <p data-lang-key="feature3-desc">地域の課題解決に向けたプロジェクトを企画・実施し、デジタル技術を活用した地域活性化に取り組んでいます。</p>
                 </div>
             </div>
         </div>
@@ -377,11 +378,11 @@ footer {
     
     <section id="mascot" class="mascot-section">
         <div class="container">
-            <h2 class="section-title">バーチャル広報担当 九伊万里絵</h2>
+            <h2 class="section-title" data-lang-key="mascot-title">バーチャル広報担当 九伊万里絵</h2>
             <div class="mascot-content">
                 <div class="mascot-info">
-                    <p>九伊万里絵（ここまりえ、愛称：ここまり）は、IX-Partyのバーチャル広報担当です。伊万里の魅力や、IX-Partyの活動を楽しく発信しています。</p>
-                    <p>AIを活用して創られたキャラクターで、伊万里の伝統的な焼き物である「伊万里焼」からインスピレーションを得たデザインが特徴です。明るく親しみやすい性格で、デジタル技術と地域の架け橋としての役割を担っています。</p>
+                    <p data-lang-key="mascot-p1">九伊万里絵（ここまりえ、愛称：ここまり）は、IX-Partyのバーチャル広報担当です。伊万里の魅力や、IX-Partyの活動を楽しく発信しています。</p>
+                    <p data-lang-key="mascot-p2">AIを活用して創られたキャラクターで、伊万里の伝統的な焼き物である「伊万里焼」からインスピレーションを得たデザインが特徴です。明るく親しみやすい性格で、デジタル技術と地域の架け橋としての役割を担っています。</p>
                     <div class="social-links">
                         <a href="https://www.instagram.com/coco9marie/" class="social-button instagram" target="_blank">@coco9marie</a>
                     </div>
@@ -395,26 +396,26 @@ footer {
     
     <section id="games" class="games-section">
         <div class="container">
-            <h2 class="section-title">ここまりのAI製ゲーム</h2>
-            <p>九伊万里絵をフィーチャーしたAI製のゲームをお楽しみいただけます。</p>
+            <h2 class="section-title" data-lang-key="games-title">ここまりのAI製ゲーム</h2>
+            <p data-lang-key="games-desc">九伊万里絵をフィーチャーしたAI製のゲームをお楽しみいただけます。</p>
             <div class="games">
                 <div class="game">
                     <h3>FlappyMarie</h3>
                     <img src="flappymarie-ogp.png" alt="FlappyMarie" class="game-image">
-                    <p>シンプルながら中毒性のある横スクロールゲーム。タップでMarieを操作し、障害物を避けましょう。</p>
-                    <a href="index.html" class="button">プレイする</a>
+                    <p data-lang-key="game1-desc">シンプルながら中毒性のある横スクロールゲーム。タップでMarieを操作し、障害物を避けましょう。</p>
+                    <a href="index.html" class="button" data-lang-key="play-button">プレイする</a>
                 </div>
                 <div class="game">
                     <h3>FlappyMarie 3D</h3>
                     <img src="flappymarie-ogp.png" alt="FlappyMarie 3D" class="game-image">
-                    <p>FlappyMarieの3Dバージョン。立体的な世界でより臨場感のあるゲーム体験をお楽しみください。</p>
-                    <a href="index3d.html" class="button">プレイする</a>
+                    <p data-lang-key="game2-desc">FlappyMarieの3Dバージョン。立体的な世界でより臨場感のあるゲーム体験をお楽しみください。</p>
+                    <a href="index3d.html" class="button" data-lang-key="play-button">プレイする</a>
                 </div>
                 <div class="game">
-                    <h3>AI俳句ジェネレーター</h3>
+                    <h3 data-lang-key="game3-title">AI俳句ジェネレーター</h3>
                     <img src="flappymarie-ogp.png" alt="AI俳句ジェネレーター" class="game-image">
-                    <p>AIが季節に合わせた俳句を生成。あなただけのオリジナル俳句をお楽しみください。</p>
-                    <a href="haiku.html" class="button">試してみる</a>
+                    <p data-lang-key="game3-desc">AIが季節に合わせた俳句を生成。あなただけのオリジナル俳句をお楽しみください。</p>
+                    <a href="haiku.html" class="button" data-lang-key="try-button">試してみる</a>
                 </div>
             </div>
         </div>
@@ -425,10 +426,118 @@ footer {
             <div class="footer-links">
                 <a href="index.html">FlappyMarie</a>
                 <a href="index3d.html">FlappyMarie 3D</a>
-                <a href="haiku.html">俳句ジェネレーター</a>
+                <a href="haiku.html" data-lang-key="haiku-generator">俳句ジェネレーター</a>
             </div>
             <p>&copy; 2023 IX-Party All Rights Reserved.</p>
         </div>
-    </footer>
+        <script>
+        // Language translations
+        const translations = {
+            'ja': {
+                'menu-about': '概要',
+                'menu-mascot': 'マスコット',
+                'menu-games': 'ゲーム',
+                'menu-haiku': '俳句ジェネレーター',
+                'lang-switch': 'English',
+                'site-description': '伊万里のDX勉強会',
+                'hero-title': '伊万里からDXを推進する勉強会',
+                'hero-description': 'IX-Party（ナインパーティ）は、伊万里市を拠点にデジタルトランスフォーメーション（DX）を学び、推進するコミュニティです。最新技術を活用し、地域の課題解決と発展に取り組んでいます。',
+                'see-details': '詳細を見る',
+                'about-title': 'IX-Partyについて',
+                'about-p1': 'IX-Party（ナインパーティ）は、佐賀県伊万里市を拠点に活動するDX勉強会です。地域の企業や個人が集まり、最新のデジタル技術やAIについて学び、実践することを目的としています。',
+                'about-p2': '私たちは定期的な勉強会やワークショップを通じて、参加者のスキルアップとネットワーキングを促進しています。また、学んだ技術を活用して地域の課題解決に取り組むプロジェクトも実施しています。',
+                'about-p3': '初心者から専門家まで、デジタル技術に興味のあるすべての方が参加できるオープンなコミュニティです。',
+                'feature1-title': '定期勉強会',
+                'feature1-desc': '月に一度の定期勉強会では、AIやデジタル技術に関する最新トピックを取り上げ、知識共有やディスカッションを行っています。',
+                'feature2-title': 'ワークショップ',
+                'feature2-desc': '実践的なワークショップを通じて、参加者が新しい技術やツールを体験し、スキルを向上させる機会を提供しています。',
+                'feature3-title': '地域プロジェクト',
+                'feature3-desc': '地域の課題解決に向けたプロジェクトを企画・実施し、デジタル技術を活用した地域活性化に取り組んでいます。',
+                'mascot-title': 'バーチャル広報担当 九伊万里絵',
+                'mascot-p1': '九伊万里絵（ここまりえ、愛称：ここまり）は、IX-Partyのバーチャル広報担当です。伊万里の魅力や、IX-Partyの活動を楽しく発信しています。',
+                'mascot-p2': 'AIを活用して創られたキャラクターで、伊万里の伝統的な焼き物である「伊万里焼」からインスピレーションを得たデザインが特徴です。明るく親しみやすい性格で、デジタル技術と地域の架け橋としての役割を担っています。',
+                'games-title': 'ここまりのAI製ゲーム',
+                'games-desc': '九伊万里絵をフィーチャーしたAI製のゲームをお楽しみいただけます。',
+                'game1-desc': 'シンプルながら中毒性のある横スクロールゲーム。タップでMarieを操作し、障害物を避けましょう。',
+                'game2-desc': 'FlappyMarieの3Dバージョン。立体的な世界でより臨場感のあるゲーム体験をお楽しみください。',
+                'game3-title': 'AI俳句ジェネレーター',
+                'game3-desc': 'AIが季節に合わせた俳句を生成。あなただけのオリジナル俳句をお楽しみください。',
+                'play-button': 'プレイする',
+                'try-button': '試してみる',
+                'haiku-generator': '俳句ジェネレーター'
+            },
+            'en': {
+                'menu-about': 'About',
+                'menu-mascot': 'Mascot',
+                'menu-games': 'Games',
+                'menu-haiku': 'Haiku Generator',
+                'lang-switch': '日本語',
+                'site-description': 'Imari DX Study Group',
+                'hero-title': 'DX Study Group from Imari',
+                'hero-description': 'IX-Party is a community based in Imari City that learns and promotes Digital Transformation (DX). We utilize the latest technologies to solve regional issues and contribute to local development.',
+                'see-details': 'See Details',
+                'about-title': 'About IX-Party',
+                'about-p1': 'IX-Party is a DX study group based in Imari City, Saga Prefecture. Local businesses and individuals gather to learn and implement the latest digital technologies and AI.',
+                'about-p2': 'We promote participants\' skill development and networking through regular meetings and workshops. We also conduct projects that apply these technologies to solve local issues.',
+                'about-p3': 'We are an open community where anyone interested in digital technology, from beginners to experts, can participate.',
+                'feature1-title': 'Regular Meetings',
+                'feature1-desc': 'In our monthly meetings, we discuss the latest topics in AI and digital technology, sharing knowledge and engaging in discussions.',
+                'feature2-title': 'Workshops',
+                'feature2-desc': 'Through practical workshops, participants can experience new technologies and tools, providing opportunities to enhance their skills.',
+                'feature3-title': 'Local Projects',
+                'feature3-desc': 'We plan and implement projects aimed at solving local issues, working on regional revitalization using digital technology.',
+                'mascot-title': 'Virtual PR Representative Kokonoi Marie',
+                'mascot-p1': 'Kokonoi Marie (nickname: Kokomari) is the virtual PR representative of IX-Party. She shares the appeal of Imari and IX-Party activities in an engaging way.',
+                'mascot-p2': 'Created using AI, her design is inspired by the traditional pottery of Imari, known as "Imari-yaki". With her bright and friendly personality, she serves as a bridge between digital technology and the local community.',
+                'games-title': 'Kokomari\'s AI-Generated Games',
+                'games-desc': 'You can enjoy AI-generated games featuring Kokonoi Marie.',
+                'game1-desc': 'A simple yet addictive side-scrolling game. Tap to control Marie and avoid obstacles.',
+                'game2-desc': 'The 3D version of FlappyMarie. Enjoy a more immersive gaming experience in a three-dimensional world.',
+                'game3-title': 'AI Haiku Generator',
+                'game3-desc': 'AI generates haiku based on the season. Enjoy your own original haiku.',
+                'play-button': 'Play',
+                'try-button': 'Try It',
+                'haiku-generator': 'Haiku Generator'
+            }
+        };
+
+        // Initialize language preference
+        let currentLang = 'ja';
+
+        // Function to set language
+        function setLanguage(lang) {
+            // Update HTML lang attribute
+            document.getElementById('html-lang').lang = lang;
+            
+            // Update all elements with data-lang-key
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Store language preference
+            localStorage.setItem('preferred-language', lang);
+            
+            // Update current language
+            currentLang = lang;
+        }
+
+        // Check for stored language preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedLang = localStorage.getItem('preferred-language');
+            if (storedLang && (storedLang === 'ja' || storedLang === 'en')) {
+                setLanguage(storedLang);
+            }
+            
+            // Add event listener to language switch button
+            document.getElementById('lang-switch').addEventListener('click', function(e) {
+                e.preventDefault();
+                const newLang = currentLang === 'ja' ? 'en' : 'ja';
+                setLanguage(newLang);
+            });
+        });
+    </script>
 </body>
 </html>

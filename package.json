@@ -1,0 +1,16 @@
+{
+  "name": "hority.github.io",
+  "version": "1.0.0",
+  "description": "Welcome to our AI-generated game, now live on GitHub Pages! This unique game is entirely crafted by artificial intelligence, showcasing the incredible possibilities of modern AI technology. The game features 九伊万里絵 (Kokonoi Marie), the virtual PR representative of IX-Party, as the central character. If you're interested, be sure to check out her social media accounts for more exciting updates and content.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@playwright/test": "^1.52.0",
+    "playwright": "^1.52.0"
+  }
+}
