@@ -516,6 +516,12 @@
       function secRange(s) {
         return hm(s[3]) + "-" + hm(s[4]);
       }
+      function lineRange(i, sectionEnd) {
+        let start = DATA[i][3],
+          next = DATA[i + 1],
+          end = next ? next[3] : sectionEnd;
+        return hm(start) + "-" + hm(end);
+      }
       function status(delta) {
         if (Math.abs(delta) <= 5) return LT.onTime;
         return delta > 0 ? LT.delay + " +" + mm(delta) : LT.ahead + " -" + mm(-delta);
@@ -546,16 +552,14 @@
         E.bar.style.width = Math.min(100, (t / TOTAL) * 100) + "%";
         E.sec.textContent = cs[1] + " (" + secRange(cs) + ")";
         E.meta.innerHTML =
-          "<span>基準 " +
-          hm(0) +
-          " / " +
+          "<span>" +
           (tRaw >= 0 ? "経過 " + clock(t) : "開始まで " + mm(-tRaw)) +
           "</span><span>" +
           "進行 " +
           status(delta) +
           "</span>";
         E.curSec.textContent = s[1];
-        E.curLabel.textContent = hm(d[3]) + "（" + d[2] + "）";
+        E.curLabel.textContent = lineRange(i, s[4]);
         E.host.innerHTML = fmt(d[4]);
         E.support.innerHTML = d[5] ? fmt(d[5]) : " ";
         E.supportBox.hidden = !d[5];
