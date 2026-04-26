@@ -382,7 +382,17 @@
           game: [`新聞紙じゃんけんは安全第一。無理な体勢は止める。`],
           closing: [`ネームカードとゴミの回収漏れを最終確認する。`],
         };
-      const LT = Object.fromEntries(L),
+      const GUIDE_STEPS = [
+          { target: "#clock", title: "現在時刻", text: "画面左上に現在時刻を表示します。" },
+          {
+            target: "#pos",
+            title: "台本全体表示",
+            text: "中央ボタンで、進行カードと台本全体表示を切り替えできます。",
+          },
+          { target: "#prev", title: "前へ", text: "前の台本行に戻るときに使います。" },
+          { target: "#next", title: "次へ", text: "次の台本行に進むときに使います。" },
+        ],
+        LT = Object.fromEntries(L),
         $ = (q) => document.querySelector(q),
         $$ = (q) => document.querySelectorAll(q),
         E = {
@@ -404,14 +414,24 @@
           prev: $("#prev"),
           next: $("#next"),
           pos: $("#pos"),
+          guide: $("#guide"),
+          guideBackdrop: $("#guideBackdrop"),
+          guideStep: $("#guideStep"),
+          guideTitle: $("#guideTitle"),
+          guideText: $("#guideText"),
+          guideNext: $("#guideNext"),
         };
       let st = load(),
         qt = null,
-        qr = 0;
+        qr = 0,
+        guideStep = 0;
       function load() {
-        let d = { i: 0, follow: 1, view: "run" };
+        let d = { i: 0, follow: 0, view: "run", guideSeen: 0 };
         try {
-          return Object.assign(d, JSON.parse(localStorage.getItem(KEY) || "{}"));
+          let saved = Object.assign(d, JSON.parse(localStorage.getItem(KEY) || "{}"));
+          if (!("guideSeen" in saved)) saved.guideSeen = 0;
+          saved.follow = 0;
+          return saved;
         } catch {
           return d;
         }
@@ -568,6 +588,31 @@
         save();
         render();
       }
+      function showGuide() {
+        if (!GUIDE_STEPS.length) return;
+        let step = GUIDE_STEPS[guideStep],
+          target = step.target ? $(step.target) : null;
+        E.guideStep.textContent = "使い方ガイド " + (guideStep + 1) + " / " + GUIDE_STEPS.length;
+        E.guideTitle.textContent = step.title;
+        E.guideText.textContent = step.text;
+        E.guide.hidden = false;
+        document.body.classList.add("guide-open");
+        $$(".guide-target").forEach((el) => el.classList.remove("guide-target"));
+        if (target) target.classList.add("guide-target");
+        E.guideNext.textContent = guideStep === GUIDE_STEPS.length - 1 ? "はじめる" : "次へ";
+      }
+      function nextGuide() {
+        guideStep++;
+        if (guideStep >= GUIDE_STEPS.length) {
+          E.guide.hidden = true;
+          document.body.classList.remove("guide-open");
+          $$(".guide-target").forEach((el) => el.classList.remove("guide-target"));
+          st.guideSeen = 1;
+          save();
+          return;
+        }
+        showGuide();
+      }
       function quick(n) {
         clearInterval(qt);
         qr = n;
@@ -591,6 +636,8 @@
         render();
       };
       E.q10.onclick = () => quick(10);
+      E.guideNext.onclick = () => nextGuide();
+      E.guideBackdrop.onclick = () => nextGuide();
       E.tl.onclick = (e) => {
         let b = e.target.closest(".row");
         if (b) {
@@ -607,3 +654,4 @@
         render();
       }, 500);
       render();
+      if (!st.guideSeen) showGuide();
