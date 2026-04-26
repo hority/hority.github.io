@@ -7,7 +7,7 @@
       content="width=device-width,initial-scale=1,viewport-fit=cover"
     />
     <meta name="theme-color" content="#f7fbf2" />
-    <title>Bearクラス 進行タイマー</title>
+    <title>Bearクラス 進行ガイド</title>
     <link rel="stylesheet" href="./bear.css" />
   </head>
   <body>
@@ -19,26 +19,22 @@
           </div>
           <div>
             <p class="k">Bear Class</p>
-            <h1>懇親会 進行タイマー</h1>
+            <h1>懇親会 進行ガイド</h1>
           </div>
         </div>
-        <div class="badge">v10 PDF</div>
+        <div class="badge">v11 11:30基準</div>
       </header>
       <main>
         <section class="timer">
           <div class="top">
             <div>
-              <p class="k">経過</p>
+              <p class="k">現在時刻</p>
               <output id="clock" class="clock">0:00:00</output>
             </div>
             <div id="sec" class="sec">開始・注意事項</div>
           </div>
           <div class="bar"><i id="bar"></i></div>
           <div id="meta" class="meta"></div>
-          <div class="controls">
-            <button id="start" class="primary">▶ スタート</button>
-            <button id="reset" class="danger">リセット</button>
-          </div>
         </section>
 
         <section id="run" class="view on">

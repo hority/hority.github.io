@@ -145,7 +145,7 @@ main {
   line-height: 1;
 }
 .sec {
-  max-width: 45%;
+  max-width: 58%;
   align-self: start;
   padding: 8px;
   border-radius: 8px;
@@ -153,9 +153,7 @@ main {
   color: var(--g);
   font-size: 13px;
   font-weight: 900;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.4;
 }
 .bar {
   height: 10px;
@@ -176,25 +174,6 @@ main {
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
-}
-.controls {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-}
-.controls button {
-  flex: 1;
-  min-height: 38px;
-  font-size: 14px;
-}
-.primary {
-  background: var(--g);
-  border-color: var(--g);
-  color: white;
-}
-.danger {
-  background: #fff4f4;
-  color: #9f2e2e;
 }
 .view {
   display: none;
