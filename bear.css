@@ -145,13 +145,24 @@
         font-size: 13px;
         font-weight: 800;
       }
-      .controls,
       .tabs,
       .quick .qa {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 6px;
         margin-top: 10px;
+      }
+      .controls {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .controls button {
+        flex: 1;
+        min-height: 38px;
+        padding: 0 4px;
+        font-size: 14px;
+        white-space: nowrap;
       }
       .primary {
         background: var(--g);
@@ -255,7 +266,6 @@
         font-weight: 950;
       }
       .list {
-        display: grid;
         gap: 8px;
       }
       .group {
