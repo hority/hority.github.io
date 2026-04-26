@@ -408,6 +408,7 @@
           t: 0,
           run: 0,
           base: 0,
+          pausedAt: 0,
           i: 0,
           follow: 1,
           view: "run",
@@ -578,9 +579,16 @@
         }, 1000);
       }
       E.start.onclick = () => {
-        st.run = !st.run;
-        st.base = Date.now();
-        st.t = elapsed();
+        let pressedAt = Date.now();
+        if (st.run) {
+          st.t = clamp(st.t + Math.floor((pressedAt - st.base) / 1000), 0, TOTAL);
+          st.run = 0;
+          st.base = 0;
+          st.pausedAt = pressedAt;
+        } else {
+          st.base = pressedAt;
+          st.run = 1;
+        }
         save();
         render();
       };
