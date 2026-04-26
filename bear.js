@@ -441,6 +441,26 @@
       function save() {
         localStorage.setItem(KEY, JSON.stringify(st));
       }
+      function parseRoute() {
+        let hash = (location.hash || "").replace(/^#/, ""),
+          [viewRaw, idxRaw] = hash.split("/");
+        let view = viewRaw === "tl" ? "tl" : "run",
+          i = Number.parseInt(idxRaw, 10);
+        return { view, i: Number.isFinite(i) ? clamp(i, 0, DATA.length - 1) : null };
+      }
+      function syncRoute(replace = false) {
+        let hash = "#" + st.view + "/" + st.i;
+        if (location.hash === hash) return;
+        if (replace) history.replaceState(null, "", hash);
+        else history.pushState(null, "", hash);
+      }
+      function applyRoute() {
+        let r = parseRoute();
+        st.view = r.view;
+        if (r.i !== null) st.i = r.i;
+        save();
+        render();
+      }
       function clamp(v, min, max) {
         return Math.min(max, Math.max(min, Number.isFinite(v) ? v : min));
       }
@@ -588,6 +608,7 @@
         st.i = clamp((st.follow ? idx(elapsed()) : st.i) + n, 0, DATA.length - 1);
         st.follow = 0;
         save();
+        syncRoute();
         render();
       }
       function showGuide() {
@@ -653,6 +674,7 @@
       E.pos.onclick = () => {
         st.view = st.view === "run" ? "tl" : "run";
         save();
+        syncRoute();
         render();
       };
       E.q10.onclick = () => quick(10);
@@ -666,11 +688,25 @@
           st.follow = 0;
           st.view = "run";
           save();
+          syncRoute();
           render();
           scrollTo({ top: 0, behavior: "smooth" });
         }
       };
+      let lastTouchEnd = 0;
+      document.addEventListener(
+        "touchend",
+        (e) => {
+          let now = Date.now();
+          if (now - lastTouchEnd < 300) e.preventDefault();
+          lastTouchEnd = now;
+        },
+        { passive: false },
+      );
+      window.addEventListener("hashchange", applyRoute);
       build();
+      applyRoute();
+      syncRoute(true);
       setInterval(() => {
         render();
       }, 500);
