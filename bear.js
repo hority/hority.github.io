@@ -356,58 +356,51 @@
           ],
         ],
         L = [
-          [`elapsed`, `経過`],
-          [`host`, `司会`],
-          [`support`, `サポート係`],
-          [`quiz`, `クイズ用`],
           [`rem`, `残り`],
           [`over`, `超過`],
           [`next`, `次`],
           [`end`, `終了`],
-          [`stop`, `⏸ 停止`],
-          [`done`, `完了`],
-          [`undone`, `未完了`],
-          [`supportOn`, `サポート表示 ON`],
-          [`supportOff`, `サポート表示 OFF`],
-          [`wake`, `画面ON`],
-          [`wakeActive`, `画面ON中`],
-          [`unsupported`, `非対応`],
-          [`unavailable`, `不可`],
-          [`reset`, `リセット`],
-          [`resetConfirm`, `タイマーと完了チェックをリセットしますか？`],
-        ];
+          [`stop`, `■ ストップ`],
+          [`start`, `▶ スタート`],
+          [`resetConfirm`, `タイマーをリセットしますか？`],
+        ],
+        MEMO_BY_SECTION = {
+          opening: [`スタンプカード配布と安全アナウンスを忘れずに。`],
+          quiz: [
+            `クイズは7分が目安。押したら区切って先生コメントへ。`,
+            `移動時は走らないよう声かけする。`,
+          ],
+          comments: [`先生コメントは短くテンポよく進行する。`],
+          chat: [`くじ引き・お菓子配布の動線を優先して確保する。`],
+          game: [`新聞紙じゃんけんは安全第一。無理な体勢は止める。`],
+          closing: [`ネームカードとゴミの回収漏れを最終確認する。`],
+        };
       const LT = Object.fromEntries(L),
         $ = (q) => document.querySelector(q),
         $$ = (q) => document.querySelectorAll(q),
         E = {
-          body: document.body,
           clock: $("#clock"),
           bar: $("#bar"),
           sec: $("#sec"),
           meta: $("#meta"),
           start: $("#start"),
-          now: $("#now"),
-          minus: $("#minus"),
-          plus: $("#plus"),
+          reset: $("#reset"),
           curSec: $("#curSec"),
           curLabel: $("#curLabel"),
+          lineRemain: $("#lineRemain"),
           host: $("#host"),
           support: $("#support"),
           supportBox: $("#supportBox"),
-          done: $("#done"),
-          quick: $("#quick"),
+          memo: $("#memo"),
+          memoBox: $("#memoBox"),
+          q10: $("#q10"),
+          run: $("#run"),
           tl: $("#tl"),
-          notes: $("#notes"),
-          tools: $("#tools"),
-          supportBtn: $("#supportBtn"),
-          wake: $("#wake"),
-          reset: $("#reset"),
           prev: $("#prev"),
           next: $("#next"),
           pos: $("#pos"),
         };
       let st = load(),
-        wake = null,
         qt = null,
         qr = 0;
       function load() {
@@ -417,15 +410,10 @@
           base: 0,
           i: 0,
           follow: 1,
-          done: {},
           view: "run",
-          support: 1,
         };
         try {
-          return Object.assign(
-            d,
-            JSON.parse(localStorage.getItem(KEY) || "{}"),
-          );
+          return Object.assign(d, JSON.parse(localStorage.getItem(KEY) || "{}"));
         } catch {
           return d;
         }
@@ -485,11 +473,6 @@
       function fmt(s) {
         return esc(s).split("|").join("<br>");
       }
-      function show(v) {
-        st.view = v;
-        save();
-        render();
-      }
       function render() {
         let t = elapsed();
         if (t >= TOTAL && st.run) {
@@ -503,8 +486,8 @@
           s = secById(d[1]),
           cs = secByTime(t),
           nx = DATA[i + 1],
-          remain = cs[4] - t;
-        E.body.classList.toggle("hide-support", !st.support);
+          remain = cs[4] - t,
+          lineRemain = (nx ? nx[3] : cs[4]) - t;
         E.clock.value = clock(t);
         E.bar.style.width = Math.min(100, (t / TOTAL) * 100) + "%";
         E.sec.textContent = cs[1];
@@ -512,9 +495,7 @@
           "<span>" +
           cs[2] +
           " / " +
-          (remain >= 0
-            ? LT.rem + " " + mm(remain)
-            : LT.over + " " + mm(-remain)) +
+          (remain >= 0 ? LT.rem + " " + mm(remain) : LT.over + " " + mm(-remain)) +
           "</span><span>" +
           (nx
             ? LT.next +
@@ -524,27 +505,31 @@
               (nx[3] >= t ? mm(nx[3] - t) : LT.over + " " + mm(t - nx[3]))
             : LT.end) +
           "</span>";
-        E.start.textContent = st.run ? LT.stop : "▶ 開始";
+        E.start.textContent = st.run ? LT.stop : LT.start;
         E.curSec.textContent = s[1];
         E.curLabel.textContent = d[2];
         E.host.innerHTML = fmt(d[4]);
         E.support.innerHTML = d[5] ? fmt(d[5]) : " ";
         E.supportBox.hidden = !d[5];
-        E.done.textContent = st.done[d[0]] ? LT.done : LT.undone;
-        E.done.classList.toggle("on", !!st.done[d[0]]);
+        let memo = MEMO_BY_SECTION[d[1]] || [];
+        E.memoBox.hidden = !memo.length;
+        E.memo.innerHTML = memo.map((m) => "・" + esc(m)).join("<br>");
+        E.lineRemain.textContent =
+          (lineRemain >= 0 ? LT.rem : LT.over) + " " + mm(Math.abs(lineRemain));
+
+        E.q10.hidden = d[1] !== "quiz";
+        E.q10.textContent = qr > 0 ? "🕰️" + qr : "🕰️10";
+
         E.pos.textContent = i + 1 + " / " + DATA.length;
         E.prev.disabled = i === 0;
         E.next.disabled = i === DATA.length - 1;
-        E.supportBtn.textContent = st.support ? LT.supportOn : LT.supportOff;
-        $$(".tabs button").forEach((b) =>
-          b.classList.toggle("on", b.dataset.v === st.view),
-        );
-        $$(".view").forEach((v) => v.classList.toggle("on", v.id === st.view));
+
+        E.run.classList.toggle("on", st.view === "run");
+        E.tl.classList.toggle("on", st.view === "tl");
+
         $$(".row").forEach((r) => {
-          let n = +r.dataset.i,
-            dd = DATA[n];
+          let n = +r.dataset.i;
           r.classList.toggle("on", n === i);
-          r.querySelector(".check").textContent = st.done[dd[0]] ? "✓" : "";
         });
       }
       function build() {
@@ -565,26 +550,14 @@
                   esc(x[0][2]) +
                   "</span><span class=copy>" +
                   esc(x[0][4].split("|")[0]) +
-                  "</span><span class=check></span></button>",
+                  "</span></button>",
               )
               .join("") +
             "</section>",
         ).join("");
-        E.notes.innerHTML = NOTES.map(
-          (n) =>
-            "<article class=note><h2>" +
-            esc(n[0]) +
-            "</h2><ul>" +
-            n[1].map((x) => "<li>" + esc(x) + "</li>").join("") +
-            "</ul></article>",
-        ).join("");
       }
       function move(n) {
-        st.i = clamp(
-          (st.follow ? idx(elapsed()) : st.i) + n,
-          0,
-          DATA.length - 1,
-        );
+        st.i = clamp((st.follow ? idx(elapsed()) : st.i) + n, 0, DATA.length - 1);
         st.follow = 0;
         save();
         render();
@@ -592,15 +565,16 @@
       function quick(n) {
         clearInterval(qt);
         qr = n;
-        E.quick.value = qr;
+        render();
         qt = setInterval(() => {
           qr--;
-          E.quick.value = qr > 0 ? qr : 0;
           if (qr <= 0) {
             clearInterval(qt);
             qt = null;
+            qr = 0;
             if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
           }
+          render();
         }, 1000);
       }
       E.start.onclick = () => {
@@ -610,74 +584,24 @@
         save();
         render();
       };
-      E.now.onclick = () => {
-        st.follow = 1;
-        st.i = idx(elapsed());
-        save();
-        render();
-      };
-      E.minus.onclick = () => {
-        st.t = clamp(elapsed() - 60, 0, TOTAL);
-        st.base = Date.now();
-        save();
-        render();
-      };
-      E.plus.onclick = () => {
-        st.t = clamp(elapsed() + 60, 0, TOTAL);
-        st.base = Date.now();
-        save();
-        render();
-      };
-      E.prev.onclick = () => move(-1);
-      E.next.onclick = () => move(1);
-      E.done.onclick = () => {
-        let id = DATA[st.i][0];
-        st.done[id] = !st.done[id];
-        save();
-        render();
-      };
-      $("#q10").onclick = () => quick(10);
-      $("#q30").onclick = () => quick(30);
-      $("#qstop").onclick = () => {
-        clearInterval(qt);
-        qt = null;
-        E.quick.value = "--";
-      };
-      E.supportBtn.onclick = () => {
-        st.support = !st.support;
-        save();
-        render();
-      };
       E.reset.onclick = () => {
         if (confirm(LT.resetConfirm)) {
+          clearInterval(qt);
+          qt = null;
+          qr = 0;
           localStorage.removeItem(KEY);
           st = load();
           render();
         }
       };
-      E.wake.onclick = async () => {
-        if (wake) {
-          await wake.release();
-          wake = null;
-          E.wake.textContent = LT.wake;
-          return;
-        }
-        if (!navigator.wakeLock) {
-          E.wake.textContent = LT.unsupported;
-          return;
-        }
-        try {
-          wake = await navigator.wakeLock.request("screen");
-          E.wake.textContent = LT.wakeActive;
-          wake.addEventListener("release", () => {
-            wake = null;
-            E.wake.textContent = LT.wake;
-          });
-        } catch {
-          E.wake.textContent = LT.unavailable;
-        }
+      E.prev.onclick = () => move(-1);
+      E.next.onclick = () => move(1);
+      E.pos.onclick = () => {
+        st.view = st.view === "run" ? "tl" : "run";
+        save();
+        render();
       };
-      $$(".tabs button").forEach((b) => (b.onclick = () => show(b.dataset.v)));
+      E.q10.onclick = () => quick(10);
       E.tl.onclick = (e) => {
         let b = e.target.closest(".row");
         if (b) {
@@ -697,4 +621,3 @@
         }
       }, 500);
       render();
-    

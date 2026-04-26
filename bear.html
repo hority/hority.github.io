@@ -34,16 +34,11 @@
           <div class="bar"><i id="bar"></i></div>
           <div id="meta" class="meta"></div>
           <div class="controls">
-            <button id="start" class="primary">▶ 開始</button
-            ><button id="now">◎ 現在</button><button id="minus">−1分</button
-            ><button id="plus">＋1分</button>
+            <button id="start" class="primary">▶ スタート</button>
+            <button id="reset" class="danger">リセット</button>
           </div>
         </section>
-        <nav class="tabs">
-          <button class="on" data-v="run">台本</button
-          ><button data-v="tl">全体</button><button data-v="notes">メモ</button
-          ><button data-v="tools">道具</button>
-        </nav>
+
         <section id="run" class="view on">
           <article class="card">
             <div class="head">
@@ -51,7 +46,10 @@
                 <p id="curSec" class="k">開始・注意事項</p>
                 <h2 id="curLabel">0:00</h2>
               </div>
-              <button id="done" class="done">未完了</button>
+              <div class="head-right">
+                <button id="q10" class="quiz10" hidden>🕰️10</button>
+                <div id="lineRemain" class="line-remain">残り 0:00</div>
+              </div>
             </div>
             <div class="block">
               <div class="bt">司会</div>
@@ -61,29 +59,18 @@
               <div class="bt">サポート係</div>
               <p id="support"></p>
             </div>
+            <div id="memoBox" class="block memo" hidden>
+              <div class="bt">メモ</div>
+              <p id="memo"></p>
+            </div>
           </article>
-          <section class="quick">
-            <div>
-              <p class="k">クイズ用</p>
-              <output id="quick" class="qv">--</output>
-            </div>
-            <div class="qa">
-              <button id="q10">10秒</button><button id="q30">30秒</button
-              ><button id="qstop">⏸ 停止</button>
-            </div>
-          </section>
         </section>
+
         <section id="tl" class="view list"></section>
-        <section id="notes" class="view list"></section>
-        <section id="tools" class="view tools">
-          <button id="supportBtn">サポート表示 ON</button
-          ><button id="wake">画面ON</button
-          ><button id="reset" class="danger">リセット</button>
-        </section>
       </main>
       <footer class="bottom">
         <button id="prev">← 戻る</button>
-        <div id="pos" class="pos">1 / 39</div>
+        <button id="pos" class="pos" type="button">1 / 39</button>
         <button id="next">次へ →</button>
       </footer>
     </div>
