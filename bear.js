@@ -1,5 +1,7 @@
       const TOTAL = 3600,
-        KEY = "bear-shinkou-timer-v10",
+        KEY = "bear-shinkou-timer-v11",
+        BASE_HOUR = 11,
+        BASE_MIN = 30,
         SEC = [
           [`opening`, `開始・注意事項`, `0:00-0:03`, 0, 180],
           [`quiz`, `先生クイズ（7分）`, `0:03-0:10`, 180, 600],
@@ -358,11 +360,11 @@
         L = [
           [`rem`, `残り`],
           [`over`, `超過`],
+          [`delay`, `遅れ`],
+          [`ahead`, `進み`],
+          [`onTime`, `オンスケ`],
           [`next`, `次`],
           [`end`, `終了`],
-          [`stop`, `■ ストップ`],
-          [`start`, `▶ スタート`],
-          [`resetConfirm`, `タイマーをリセットしますか？`],
         ],
         MEMO_BY_SECTION = {
           opening: [`スタンプカード配布と安全アナウンスを忘れずに。`],
@@ -388,8 +390,6 @@
           bar: $("#bar"),
           sec: $("#sec"),
           meta: $("#meta"),
-          start: $("#start"),
-          reset: $("#reset"),
           curSec: $("#curSec"),
           curLabel: $("#curLabel"),
           lineRemain: $("#lineRemain"),
@@ -409,15 +409,7 @@
         qt = null,
         qr = 0;
       function load() {
-        let d = {
-          t: 0,
-          run: 0,
-          base: 0,
-          pausedAt: 0,
-          i: 0,
-          follow: 1,
-          view: "run",
-        };
+        let d = { i: 0, follow: 1, view: "run" };
         try {
           return Object.assign(d, JSON.parse(localStorage.getItem(KEY) || "{}"));
         } catch {
@@ -425,23 +417,13 @@
         }
       }
       function save() {
-        localStorage.setItem(
-          KEY,
-          JSON.stringify(
-            Object.assign({}, st, {
-              t: elapsed(),
-              base: st.run ? Date.now() : 0,
-            }),
-          ),
-        );
+        localStorage.setItem(KEY, JSON.stringify(st));
       }
       function clamp(v, min, max) {
         return Math.min(max, Math.max(min, Number.isFinite(v) ? v : min));
       }
       function elapsed() {
-        return st.run
-          ? clamp(st.t + Math.floor((Date.now() - st.base) / 1000), 0, TOTAL)
-          : clamp(st.t, 0, TOTAL);
+        return Math.floor((Date.now() - baseTime().getTime()) / 1000);
       }
       function idx(t) {
         let x = 0;
@@ -470,6 +452,32 @@
         t = Math.max(0, Math.floor(t));
         return Math.floor(t / 60) + ":" + pad(t % 60);
       }
+      function hm(t) {
+        let x = new Date(baseTime().getTime() + Math.floor(t) * 1000);
+        return pad(x.getHours()) + ":" + pad(x.getMinutes());
+      }
+      function hms(d) {
+        return pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+      }
+      function baseTime() {
+        let now = new Date();
+        return new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          BASE_HOUR,
+          BASE_MIN,
+          0,
+          0,
+        );
+      }
+      function secRange(s) {
+        return hm(s[3]) + "-" + hm(s[4]);
+      }
+      function status(delta) {
+        if (Math.abs(delta) <= 5) return LT.onTime;
+        return delta > 0 ? LT.delay + " +" + mm(delta) : LT.ahead + " -" + mm(-delta);
+      }
       function esc(s) {
         return String(s)
           .replaceAll("&", "&amp;")
@@ -480,40 +488,32 @@
         return esc(s).split("|").join("<br>");
       }
       function render() {
-        let t = elapsed();
-        if (t >= TOTAL && st.run) {
-          st.t = TOTAL;
-          st.run = 0;
-          st.base = 0;
-        }
-        let i = st.follow ? idx(t) : clamp(st.i, 0, DATA.length - 1);
+        let now = new Date(),
+          tRaw = elapsed(),
+          t = clamp(tRaw, 0, TOTAL),
+          i = st.follow ? idx(t) : clamp(st.i, 0, DATA.length - 1);
         st.i = i;
         let d = DATA[i],
           s = secById(d[1]),
           cs = secByTime(t),
           nx = DATA[i + 1],
           remain = cs[4] - t,
-          lineRemain = (nx ? nx[3] : cs[4]) - t;
-        E.clock.value = clock(t);
+          lineRemain = (nx ? nx[3] : cs[4]) - t,
+          delta = tRaw - d[3];
+        E.clock.value = hms(now);
         E.bar.style.width = Math.min(100, (t / TOTAL) * 100) + "%";
-        E.sec.textContent = cs[1];
+        E.sec.textContent = cs[1] + " (" + secRange(cs) + ")";
         E.meta.innerHTML =
-          "<span>" +
-          cs[2] +
+          "<span>基準 " +
+          hm(0) +
           " / " +
-          (remain >= 0 ? LT.rem + " " + mm(remain) : LT.over + " " + mm(-remain)) +
+          (tRaw >= 0 ? "経過 " + clock(t) : "開始まで " + mm(-tRaw)) +
           "</span><span>" +
-          (nx
-            ? LT.next +
-              " " +
-              nx[2] +
-              " " +
-              (nx[3] >= t ? mm(nx[3] - t) : LT.over + " " + mm(t - nx[3]))
-            : LT.end) +
+          "進行 " +
+          status(delta) +
           "</span>";
-        E.start.textContent = st.run ? LT.stop : LT.start;
         E.curSec.textContent = s[1];
-        E.curLabel.textContent = d[2];
+        E.curLabel.textContent = hm(d[3]) + "（" + d[2] + "）";
         E.host.innerHTML = fmt(d[4]);
         E.support.innerHTML = d[5] ? fmt(d[5]) : " ";
         E.supportBox.hidden = !d[5];
@@ -544,7 +544,7 @@
             "<section class=group><div class=gt><span>" +
             esc(s[1]) +
             "</span><span>" +
-            s[2] +
+            secRange(s) +
             "</span></div>" +
             DATA.map((d, i) => [d, i])
               .filter((x) => x[0][1] === s[0])
@@ -553,7 +553,7 @@
                   "<button class=row data-i=" +
                   x[1] +
                   "><span class=time>" +
-                  esc(x[0][2]) +
+                  esc(hm(x[0][3])) +
                   "</span><span class=copy>" +
                   esc(x[0][4].split("|")[0]) +
                   "</span></button>",
@@ -583,30 +583,6 @@
           render();
         }, 1000);
       }
-      E.start.onclick = () => {
-        let pressedAt = Date.now();
-        if (st.run) {
-          st.t = clamp(st.t + Math.floor((pressedAt - st.base) / 1000), 0, TOTAL);
-          st.run = 0;
-          st.base = 0;
-          st.pausedAt = pressedAt;
-        } else {
-          st.base = pressedAt;
-          st.run = 1;
-        }
-        save();
-        render();
-      };
-      E.reset.onclick = () => {
-        if (confirm(LT.resetConfirm)) {
-          clearInterval(qt);
-          qt = null;
-          qr = 0;
-          localStorage.removeItem(KEY);
-          st = load();
-          render();
-        }
-      };
       E.prev.onclick = () => move(-1);
       E.next.onclick = () => move(1);
       E.pos.onclick = () => {
@@ -628,9 +604,6 @@
       };
       build();
       setInterval(() => {
-        if (st.run) {
-          render();
-          save();
-        }
+        render();
       }, 500);
       render();
