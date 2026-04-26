@@ -329,7 +329,22 @@ main {
 .guide-backdrop {
   position: absolute;
   inset: 0;
-  background: #0f18159e;
+  background: transparent;
+}
+.guide-hole {
+  position: fixed;
+  left: var(--hole-left, -9999px);
+  top: var(--hole-top, -9999px);
+  width: var(--hole-width, 0px);
+  height: var(--hole-height, 0px);
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px #0f18159e;
+  pointer-events: none;
+  transition:
+    left 0.18s ease,
+    top 0.18s ease,
+    width 0.18s ease,
+    height 0.18s ease;
 }
 .guide-card {
   position: absolute;
@@ -349,6 +364,16 @@ main {
 .guide-card p {
   margin: 0 0 12px;
   line-height: 1.5;
+}
+.guide-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.guide-card .ghost {
+  border-color: #d8e3dc;
+  color: var(--muted);
+  background: #fff;
 }
 .guide-target {
   position: relative;

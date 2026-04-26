@@ -416,9 +416,11 @@
           pos: $("#pos"),
           guide: $("#guide"),
           guideBackdrop: $("#guideBackdrop"),
+          guideHole: $("#guideHole"),
           guideStep: $("#guideStep"),
           guideTitle: $("#guideTitle"),
           guideText: $("#guideText"),
+          guideSkip: $("#guideSkip"),
           guideNext: $("#guideNext"),
         };
       let st = load(),
@@ -599,16 +601,34 @@
         document.body.classList.add("guide-open");
         $$(".guide-target").forEach((el) => el.classList.remove("guide-target"));
         if (target) target.classList.add("guide-target");
+        drawGuideHole(target);
         E.guideNext.textContent = guideStep === GUIDE_STEPS.length - 1 ? "はじめる" : "次へ";
+      }
+      function drawGuideHole(target) {
+        if (!E.guideHole) return;
+        if (!target) {
+          E.guideHole.style.setProperty("--hole-left", "-9999px");
+          E.guideHole.style.setProperty("--hole-top", "-9999px");
+          return;
+        }
+        let r = target.getBoundingClientRect(),
+          pad = 8;
+        E.guideHole.style.setProperty("--hole-left", Math.max(0, r.left - pad) + "px");
+        E.guideHole.style.setProperty("--hole-top", Math.max(0, r.top - pad) + "px");
+        E.guideHole.style.setProperty("--hole-width", r.width + pad * 2 + "px");
+        E.guideHole.style.setProperty("--hole-height", r.height + pad * 2 + "px");
+      }
+      function closeGuide() {
+        E.guide.hidden = true;
+        document.body.classList.remove("guide-open");
+        $$(".guide-target").forEach((el) => el.classList.remove("guide-target"));
+        st.guideSeen = 1;
+        save();
       }
       function nextGuide() {
         guideStep++;
         if (guideStep >= GUIDE_STEPS.length) {
-          E.guide.hidden = true;
-          document.body.classList.remove("guide-open");
-          $$(".guide-target").forEach((el) => el.classList.remove("guide-target"));
-          st.guideSeen = 1;
-          save();
+          closeGuide();
           return;
         }
         showGuide();
@@ -637,6 +657,7 @@
       };
       E.q10.onclick = () => quick(10);
       E.guideNext.onclick = () => nextGuide();
+      E.guideSkip.onclick = () => closeGuide();
       E.guideBackdrop.onclick = () => nextGuide();
       E.tl.onclick = (e) => {
         let b = e.target.closest(".row");
