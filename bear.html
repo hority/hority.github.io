@@ -74,11 +74,15 @@
     </div>
     <div id="guide" class="guide" hidden>
       <div id="guideBackdrop" class="guide-backdrop"></div>
+      <div id="guideHole" class="guide-hole" aria-hidden="true"></div>
       <div id="guideCard" class="guide-card">
         <p id="guideStep" class="k">使い方ガイド 1 / 4</p>
         <h2 id="guideTitle">この画面の見かた</h2>
         <p id="guideText"></p>
-        <button id="guideNext" type="button">次へ</button>
+        <div class="guide-actions">
+          <button id="guideSkip" type="button" class="ghost">スキップ</button>
+          <button id="guideNext" type="button">次へ</button>
+        </div>
       </div>
     </div>
     <script src="./bear.js"></script>
