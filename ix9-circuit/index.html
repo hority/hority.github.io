@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#071316">
+  <title>九伊万里サーキット - IX-Party 3D Racing</title>
+  <meta name="description" content="IX-Partyをテーマにしたスマホ縦持ちの3D周回レーシングゲーム。九伊万里絵のカートで9チェックポイントを抜け、ベストラップを狙います。">
+  <meta property="og:title" content="九伊万里サーキット">
+  <meta property="og:description" content="九伊万里絵のカートで9チェックポイントを回るIX-Party 3Dレーシング。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hority.github.io/ix9-circuit/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <main id="app" aria-label="九伊万里サーキット">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="hud" aria-live="polite">
+      <section class="hud-chip objective" aria-label="Objective">
+        <span class="chip-mark">IX</span>
+        <span>
+          <strong>九伊万里サーキット</strong>
+          <small>9CP Lap Racer</small>
+        </span>
+      </section>
+
+      <section class="hud-chip status" aria-label="Status">
+        <span><b data-ui="lap">1</b><small>lap</small></span>
+        <span><b data-ui="speed">0</b><small>km/h</small></span>
+        <span><b data-ui="bestLap">--</b><small>best</small></span>
+      </section>
+
+      <section class="race-strip" aria-label="Race progress">
+        <div class="race-row">
+          <span data-ui="lapTime">0.0s</span>
+          <b>CP <span data-ui="checkpoint">0</span>/9</b>
+        </div>
+        <div class="meter"><span data-ui="boostFill"></span></div>
+      </section>
+
+      <div class="toast" data-ui="message">Ready</div>
+    </div>
+
+    <section id="startOverlay" class="overlay">
+      <div class="overlay-inner">
+        <p class="eyebrow">IX-Party 3D</p>
+        <h1>九伊万里<br>サーキット</h1>
+        <p class="lead">ドラッグでステア、触れている間だけ加速。9つのチェックポイントを抜けて3周のベストタイムを狙います。</p>
+        <button id="startButton" type="button">Start</button>
+        <p class="thumb-hint">縦持ちで画面を左右にドラッグ</p>
+      </div>
+    </section>
+
+    <section id="finishOverlay" class="overlay" hidden>
+      <div class="overlay-inner">
+        <p class="eyebrow">Race Finished</p>
+        <h2><span data-ui="finalScore">0</span> pt</h2>
+        <p class="lead">Best Lap <span data-ui="finalBestLap">--</span></p>
+        <button id="restartButton" type="button">Retry</button>
+      </div>
+    </section>
+
+    <div id="landscapeHint">スマホを縦向きにするとコースが見やすくなります</div>
+    <noscript>JavaScriptを有効にして遊んでください。</noscript>
+  </main>
+
+  <script type="module" src="./src/game.js"></script>
+</body>
+</html>
