@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#071316">
+  <title>九伊万里絵の9皿ラン - IX-Party 3D Game</title>
+  <meta name="description" content="IX-Partyと九伊万里絵をテーマにした、スマホ縦持ち片手操作の3Dランナーゲーム。">
+  <meta property="og:title" content="九伊万里絵の9皿ラン">
+  <meta property="og:description" content="9つの伊万里焼風ディッシュを集めてIX Party Rushをつなぐ3Dミニゲーム。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hority.github.io/ix9-nine-rush/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <main id="app" aria-label="九伊万里絵の9皿ラン">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="hud" aria-live="polite">
+      <section class="hud-chip objective" aria-label="Objective">
+        <span class="chip-mark">IX</span>
+        <span>
+          <strong>九伊万里絵</strong>
+          <small>9皿でRush</small>
+        </span>
+      </section>
+
+      <section class="hud-chip status" aria-label="Score">
+        <span><b data-ui="score">0</b><small>score</small></span>
+        <span><b data-ui="best">0</b><small>best</small></span>
+        <span><b data-ui="level">1</b><small>rush</small></span>
+      </section>
+
+      <section class="combo-strip" aria-label="Nine combo meter">
+        <div class="combo-label">
+          <span>9 Dish</span>
+          <b><span data-ui="combo">0</span>/9</b>
+        </div>
+        <div class="meter"><span data-ui="comboFill"></span></div>
+      </section>
+
+      <div class="toast" data-ui="message">IX Partyへ</div>
+    </div>
+
+    <section id="startOverlay" class="overlay">
+      <div class="overlay-inner">
+        <p class="eyebrow">IX-Party 3D</p>
+        <h1>九伊万里絵の9皿ラン</h1>
+        <p class="lead">伊万里焼風の皿を9つ集めるたび、IX Party Rushが加速します。</p>
+        <button id="startButton" type="button">Start</button>
+        <p class="thumb-hint">画面を押したまま横へ</p>
+      </div>
+    </section>
+
+    <section id="gameOverOverlay" class="overlay" hidden>
+      <div class="overlay-inner">
+        <p class="eyebrow">Run Finished</p>
+        <h2>Score <span data-ui="finalScore">0</span></h2>
+        <p class="lead">Best <span data-ui="finalBest">0</span></p>
+        <button id="restartButton" type="button">Retry</button>
+      </div>
+    </section>
+
+    <div id="landscapeHint">スマホを縦向きにすると遊びやすくなります</div>
+    <noscript>JavaScriptを有効にして遊んでください。</noscript>
+  </main>
+
+  <script type="module" src="./src/game.js"></script>
+</body>
+</html>
