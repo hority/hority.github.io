@@ -1,0 +1,29 @@
+{
+  "name": "ix9-bit-arcade",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build:roms": "node tools/build-roms.mjs",
+    "build": "npm run build:roms && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "latest",
+    "nes_rust_wasm": "0.1.2",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "^6.0.3",
+    "sharp": "^0.35.3",
+    "typescript": "latest",
+    "vite": "^8.1.5",
+    "vite-plugin-pwa": "^1.3.0",
+    "vite-plugin-wasm": "^3.6.0"
+  }
+}
