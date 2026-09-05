@@ -1,0 +1,21 @@
+IMARI FIGHTERS v2.7 — Music and Sound Credits
+
+All files in this directory are bundled locally. No runtime audio service is used.
+
+SOUND EFFECTS / JINGLES
+Kenney: Sci-Fi Sounds and Music Jingles (CC0 1.0).
+https://kenney.nl/assets/sci-fi-sounds
+https://kenney.nl/assets/music-jingles
+Converted from OGG to 22.05 kHz mono WAV; peak limiting applied.
+
+RECORDED MUSIC
+Umplix: Dance Music Pack — The Celebrity, Can't Resist the Groove, Twin Layers, Silent Dance Floor (CC0).
+https://opengameart.org/content/dance-music-pack
+Juhani Junkala / SubspaceAudio: Epic Boss Battle [Seamlessly Looping] (CC0).
+https://opengameart.org/content/boss-battle-music
+Converted from WAV to 32 kHz stereo MP3 at 96 kbps; loudness normalized.
+
+License: CC0 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/
+
+The story and hidden-boss score, supplemental synthesis, and electrical layers are original procedural compositions for IMARI FIGHTERS.

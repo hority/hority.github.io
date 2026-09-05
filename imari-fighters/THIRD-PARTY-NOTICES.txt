@@ -30,3 +30,15 @@ Official FBX export obtained with Tripo Studio Pro on 2026-09-05.
 Blender rigging, scale normalization and game optimization by hority's project.
 This model credit is separate from the Three.js MIT software license above.
 Tripo terms: https://www.tripo3d.ai/terms
+
+
+Environment — Kenney Nature Kit 2.1
+https://kenney.nl/assets/nature-kit
+CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
+Seven selected tree/rock/bush/grass props normalized in Blender and optimized into one GLB. Colors adapted to Imari Bay.
+The stylized Imari Bay-inspired panorama was generated with OpenAI imagegen for this project. It is an artistic scene, not a geographic reconstruction.
+Arena, shores, lights and pickup models are original project geometry.
+
+Audio — CC0 music and sounds
+Kenney, Umplix, Juhani Junkala / SubspaceAudio.
+Full track mapping, source links and licenses: audio/CREDITS.txt
