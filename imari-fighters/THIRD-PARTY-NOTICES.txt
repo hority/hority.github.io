@@ -22,3 +22,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+Kokomari / 九伊万里絵 3D character
+Generated with Tripo AI P2.0 Preview from the game's original reference artwork.
+Source model: https://studio.tripo3d.ai/workspace/generate/dea65d58-95f5-4d0f-919c-b6001948f06a
+Official FBX export obtained with Tripo Studio Pro on 2026-09-05.
+Blender rigging, scale normalization and game optimization by hority's project.
+This model credit is separate from the Three.js MIT software license above.
+Tripo terms: https://www.tripo3d.ai/terms
