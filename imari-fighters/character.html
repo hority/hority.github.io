@@ -1,6 +1,28 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#e9eee8"><link rel="icon" href="./icon.svg" type="image/svg+xml"><title>ここまり — 3D CHARACTER</title>  <script type="module" crossorigin src="./assets/character-BaJ4RsOU.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/three-ByUhFZPC.js">
-  <link rel="modulepreload" crossorigin href="./assets/GLTFLoader-OS0hogd1.js">
-  <link rel="stylesheet" crossorigin href="./assets/character-CeMnYg19.css">
-</head><body><div id="character-studio"><canvas aria-label="ここまりの3Dモデル。ドラッグで回転、ピンチで拡大"></canvas><header><a class="back" href="./">← ゲームへ</a><span>NINE PARTY · 09</span></header><section class="identity"><p>THE PORCELAIN STRIKER</p><h1>九伊万里絵<span>KOKOMARI</span></h1></section><p id="load-status" role="status">ここまりを準備しています…</p><footer><p class="hint">スワイプで回転 · ピンチで拡大</p><nav aria-label="モデルの表示"><button data-view="full" aria-pressed="true">全身</button><button data-view="face" aria-pressed="false">顔</button><button data-view="back" aria-pressed="false">後ろ姿</button><button id="pose" aria-pressed="false">戦闘ポーズ</button><button id="rotate" aria-pressed="false" aria-label="自動回転">↻</button></nav></footer><output id="model-stats" hidden></output></div></body></html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#e9eee8"><link rel="icon" href="./icon.svg" type="image/svg+xml"><title>ここまり — 3D CHARACTER</title>  <script type="module" crossorigin src="./assets/character-N_9RZFkT.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/three-DZM8Og0w.js">
+  <link rel="modulepreload" crossorigin href="./assets/SkeletonUtils-b73dszOu.js">
+  <link rel="stylesheet" crossorigin href="./assets/character-jfcqYJEg.css">
+</head>
+<body>
+  <div id="character-studio" data-character="heroine">
+    <canvas aria-label="ここまりの3Dモデル。ドラッグで回転、ピンチで拡大" aria-describedby="model-hint">ここまりの回転・拡大ができる3Dモデルです。</canvas>
+    <header><a class="back" href="./">← ゲームへ</a><span>IMARI FIGHTERS · 3D</span></header>
+    <nav class="character-picker" aria-label="展示キャラクター">
+      <button data-character="heroine" aria-pressed="true">ここまり</button>
+      <button data-character="scout" aria-pressed="false">ザコ</button>
+      <button data-character="boss" aria-pressed="false">ボス</button>
+    </nav>
+    <section class="identity" aria-live="polite" aria-atomic="true"><p id="character-tagline">THE PORCELAIN STRIKER</p><h1><span id="character-name">九伊万里絵</span><span id="character-subtitle">KOKOMARI</span></h1></section>
+    <p id="load-status" role="status">ここまりを準備しています…</p>
+    <footer>
+      <p class="hint" id="model-hint">スワイプで回転 · ピンチで拡大</p>
+      <nav class="view-picker" aria-label="ここまりの表示">
+        <button data-view="full" aria-pressed="true">全身</button><button data-view="face" aria-pressed="false">顔</button><button data-view="back" aria-pressed="false">後ろ姿</button><button id="pose" aria-pressed="false">戦闘ポーズ</button><button id="rotate" aria-pressed="false" aria-label="ここまりを自動回転">↻</button>
+      </nav>
+    </footer>
+    <output id="model-stats" hidden></output>
+  </div>
+</body>
+</html>
